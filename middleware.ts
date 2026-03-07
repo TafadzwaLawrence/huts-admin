@@ -19,6 +19,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Guard: if Supabase env vars are missing, redirect to login to avoid a crash
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    return NextResponse.redirect(loginUrl)
+  }
+
   // Build a response we can attach cookie mutations to
   let response = NextResponse.next({
     request: { headers: request.headers },

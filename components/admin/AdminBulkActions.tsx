@@ -68,9 +68,9 @@ export function BulkActionToolbar({
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-charcoal text-white rounded-lg shadow-2xl px-6 py-4 flex items-center gap-6 border border-dark-gray">
+      <div className="bg-adm-surface-2 text-adm-text rounded-xl shadow-2xl px-6 py-4 flex items-center gap-6 border border-adm-border">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
+          <div className="w-6 h-6 rounded-full bg-adm-accent/20 flex items-center justify-center text-xs font-bold text-adm-accent">
             {selectedCount}
           </div>
           <span className="font-medium">
@@ -86,7 +86,7 @@ export function BulkActionToolbar({
               <button
                 onClick={() => handleBulkAction('approve', 'approve')}
                 disabled={loading}
-                className="px-3 py-1.5 bg-[#212529] hover:bg-black rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-adm-green/15 text-adm-green hover:bg-adm-green/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 <CheckSquare size={14} />
                 Approve
@@ -94,7 +94,7 @@ export function BulkActionToolbar({
               <button
                 onClick={() => handleBulkAction('reject', 'reject')}
                 disabled={loading}
-                className="px-3 py-1.5 bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-adm-red/15 text-adm-red hover:bg-adm-red/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 <XSquare size={14} />
                 Reject
@@ -107,7 +107,7 @@ export function BulkActionToolbar({
               <button
                 onClick={() => handleBulkAction('suspend', 'suspend')}
                 disabled={loading}
-                className="px-3 py-1.5 bg-[#495057] hover:bg-[#212529] rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-adm-amber/15 text-adm-amber hover:bg-adm-amber/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 <UserX size={14} />
                 Suspend
@@ -115,7 +115,7 @@ export function BulkActionToolbar({
               <button
                 onClick={() => handleBulkAction('unsuspend', 'unsuspend')}
                 disabled={loading}
-                className="px-3 py-1.5 bg-[#212529] hover:bg-black rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-adm-green/15 text-adm-green hover:bg-adm-green/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 <UserCheck size={14} />
                 Unsuspend
@@ -126,18 +126,18 @@ export function BulkActionToolbar({
           <button
             onClick={() => handleBulkAction('delete', 'delete')}
             disabled={loading}
-            className="px-3 py-1.5 bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-adm-red/15 text-adm-red hover:bg-adm-red/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
           >
             <Trash2 size={14} />
             Delete
           </button>
 
-          <div className="h-6 w-px bg-white/20" />
+          <div className="h-6 w-px bg-adm-border" />
 
           <button
             onClick={onClearSelection}
             disabled={loading}
-            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 bg-adm-surface text-adm-muted hover:text-adm-text rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
           >
             Clear
           </button>

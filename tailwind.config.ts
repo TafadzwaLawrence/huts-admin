@@ -10,6 +10,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Admin dark theme tokens
+        'adm-bg':        '#0D1117',
+        'adm-surface':   '#161B22',
+        'adm-surface-2': '#21262D',
+        'adm-border':    '#30363D',
+        'adm-text':      '#E6EDF3',
+        'adm-muted':     '#7D8590',
+        'adm-faint':     '#484F58',
+        'adm-accent':    '#8957E5',
+        'adm-green':     '#3FB950',
+        'adm-amber':     '#D29922',
+        'adm-red':       '#F85149',
+        'adm-blue':      '#58A6FF',
+        // Legacy
         'accent-red': '#FF6B6B',
         'accent-green': '#51CF66',
         border: 'hsl(var(--border))',

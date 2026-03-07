@@ -15,43 +15,43 @@ const badgeConfig: Record<BadgeVariant, {
   icon: typeof ShieldCheck
 }> = {
   approved: {
-    bg: 'bg-[#51CF66]/10',
-    text: 'text-[#51CF66]',
+    bg: 'bg-adm-green/10',
+    text: 'text-adm-green',
     icon: ShieldCheck,
   },
   pending: {
-    bg: 'bg-[#212529]/10',
-    text: 'text-[#495057]',
+    bg: 'bg-adm-amber/10',
+    text: 'text-adm-amber',
     icon: ShieldAlert,
   },
   rejected: {
-    bg: 'bg-[#FF6B6B]/10',
-    text: 'text-[#FF6B6B]',
+    bg: 'bg-adm-red/10',
+    text: 'text-adm-red',
     icon: ShieldX,
   },
   active: {
-    bg: 'bg-[#51CF66]/10',
-    text: 'text-[#51CF66]',
+    bg: 'bg-adm-green/10',
+    text: 'text-adm-green',
     icon: Check,
   },
   inactive: {
-    bg: 'bg-[#E9ECEF]',
-    text: 'text-[#ADB5BD]',
+    bg: 'bg-adm-surface-2',
+    text: 'text-adm-faint',
     icon: X,
   },
   success: {
-    bg: 'bg-[#51CF66]/10',
-    text: 'text-[#51CF66]',
+    bg: 'bg-adm-green/10',
+    text: 'text-adm-green',
     icon: Check,
   },
   warning: {
-    bg: 'bg-[#212529]/10',
-    text: 'text-[#495057]',
+    bg: 'bg-adm-amber/10',
+    text: 'text-adm-amber',
     icon: Clock,
   },
   error: {
-    bg: 'bg-[#FF6B6B]/10',
-    text: 'text-[#FF6B6B]',
+    bg: 'bg-adm-red/10',
+    text: 'text-adm-red',
     icon: X,
   },
 }

@@ -76,15 +76,15 @@ export default function AdminPropertiesPage() {
         action={
           <div className="flex items-center gap-3">
             <AdminExportButton type="properties" />
-            <div className="flex items-center gap-0.5 bg-[#F8F9FA] p-0.5 rounded-full border border-[#E9ECEF]">
+            <div className="flex items-center gap-0.5 bg-adm-surface-2 p-0.5 rounded-full border border-adm-border">
               {['all', 'approved', 'pending', 'rejected'].map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all ${
                   statusFilter === s
-                    ? 'bg-[#212529] text-white shadow-sm'
-                    : 'text-[#495057] hover:text-[#212529]'
+                    ? 'bg-adm-accent text-white shadow-sm'
+                    : 'text-adm-muted hover:text-adm-text'
                 }`}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -96,13 +96,13 @@ export default function AdminPropertiesPage() {
       />
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden">
+        <div className="bg-adm-surface rounded-xl border border-adm-border overflow-hidden">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#E9ECEF]">
-              <div className="w-14 h-14 bg-[#E9ECEF] rounded-lg animate-pulse flex-shrink-0" />
+            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-adm-border">
+              <div className="w-14 h-14 bg-adm-border rounded-lg animate-pulse flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-[#E9ECEF] rounded animate-pulse w-1/2" />
-                <div className="h-3 bg-[#E9ECEF] rounded animate-pulse w-1/3" />
+                <div className="h-4 bg-adm-border rounded animate-pulse w-1/2" />
+                <div className="h-3 bg-adm-border rounded animate-pulse w-1/3" />
               </div>
             </div>
           ))}
@@ -115,9 +115,9 @@ export default function AdminPropertiesPage() {
         />
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden">
+          <div className="bg-adm-surface rounded-xl border border-adm-border overflow-hidden">
             {/* Table Header */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-[#F8F9FA] text-[10px] font-semibold text-[#ADB5BD] uppercase tracking-wider border-b border-[#E9ECEF]">
+            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-adm-surface-2 text-[10px] font-semibold text-adm-faint uppercase tracking-wider border-b border-adm-border">
               <div className="col-span-5">Property</div>
               <div className="col-span-2">Owner</div>
               <div className="col-span-1">Type</div>
@@ -127,7 +127,7 @@ export default function AdminPropertiesPage() {
               <div className="col-span-1"></div>
             </div>
 
-            <div className="divide-y divide-[#E9ECEF]">
+            <div className="divide-y divide-adm-border">
               {properties.map((property) => {
                 const primaryImage = property.property_images?.find(img => img.is_primary) || property.property_images?.[0]
                 const listingType = property.listing_type || 'rent'
@@ -140,21 +140,21 @@ export default function AdminPropertiesPage() {
                 const owner = property.profiles
 
                 return (
-                  <div key={property.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-center px-5 py-3.5 hover:bg-[#F8F9FA] transition-colors">
+                  <div key={property.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-center px-5 py-3.5 hover:bg-adm-surface-2 transition-colors">
                     {/* Property */}
                     <div className="md:col-span-5 flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#F8F9FA] flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-adm-surface-2 flex-shrink-0">
                         {primaryImage?.url ? (
                           <Image src={primaryImage.url} alt="" fill className="object-cover" sizes="48px" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Home size={ICON_SIZES.md} className="text-[#ADB5BD]" />
+                            <Home size={ICON_SIZES.md} className="text-adm-faint" />
                           </div>
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#212529] truncate">{property.title}</p>
-                        <p className="text-xs text-[#ADB5BD] flex items-center gap-1 truncate">
+                        <p className="text-sm font-medium text-adm-text truncate">{property.title}</p>
+                        <p className="text-xs text-adm-faint flex items-center gap-1 truncate">
                           <MapPin size={ICON_SIZES.xs} />
                           {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city}
                         </p>
@@ -163,8 +163,8 @@ export default function AdminPropertiesPage() {
 
                     {/* Owner */}
                     <div className="md:col-span-2 min-w-0 hidden md:block">
-                      <p className="text-xs text-[#495057] truncate">{owner?.name || 'Unknown'}</p>
-                      <p className="text-[10px] text-[#ADB5BD] truncate">{owner?.email}</p>
+                      <p className="text-xs text-adm-muted truncate">{owner?.name || 'Unknown'}</p>
+                      <p className="text-[10px] text-adm-faint truncate">{owner?.email}</p>
                     </div>
 
                     {/* Type */}
@@ -176,7 +176,7 @@ export default function AdminPropertiesPage() {
 
                     {/* Price */}
                     <div className="md:col-span-1 hidden md:block">
-                      <p className="text-sm font-semibold text-[#212529]">{displayPrice}</p>
+                      <p className="text-sm font-semibold text-adm-text">{displayPrice}</p>
                     </div>
 
                     {/* Status */}
@@ -191,7 +191,7 @@ export default function AdminPropertiesPage() {
 
                     {/* Date */}
                     <div className="md:col-span-1 hidden md:block">
-                      <p className="text-xs text-[#ADB5BD]">
+                      <p className="text-xs text-adm-faint">
                         {new Date(property.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </p>
                     </div>
@@ -201,7 +201,7 @@ export default function AdminPropertiesPage() {
                       <Link
                         href={`/property/${property.slug || property.id}`}
                         target="_blank"
-                        className="p-2 text-[#ADB5BD] hover:text-[#212529] transition-colors"
+                        className="p-2 text-adm-faint hover:text-adm-text transition-colors"
                       >
                         <ExternalLink size={ICON_SIZES.sm} />
                       </Link>

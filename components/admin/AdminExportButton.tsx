@@ -45,7 +45,7 @@ export function AdminExportButton({ type, label }: AdminExportButtonProps) {
     <button
       onClick={handleExport}
       disabled={loading}
-      className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-[#E9ECEF] rounded-lg hover:bg-[#F8F9FA] transition-colors disabled:opacity-50"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-adm-border text-adm-muted rounded-lg hover:bg-adm-surface-2 hover:text-adm-text transition-colors disabled:opacity-50"
     >
       <Download size={14} />
       {loading ? 'Exporting...' : label || 'Export CSV'}

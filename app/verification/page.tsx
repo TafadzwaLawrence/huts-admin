@@ -121,7 +121,7 @@ export default function AdminVerificationPage() {
           properties.length > 0 && (
             <button
               onClick={toggleAll}
-              className="text-sm px-3 py-1.5 border border-[#E9ECEF] rounded-lg hover:bg-[#F8F9FA] transition-colors"
+              className="text-sm px-3 py-1.5 border border-adm-border rounded-lg hover:bg-adm-surface-2 text-adm-muted transition-colors"
             >
               {isAllSelected ? 'Deselect All' : 'Select All'}
             </button>
@@ -132,13 +132,13 @@ export default function AdminVerificationPage() {
       {loading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-[#E9ECEF] p-5">
+            <div key={i} className="bg-adm-surface rounded-xl border border-adm-border p-5">
               <div className="flex gap-4">
-                <div className="w-32 h-24 bg-[#E9ECEF] rounded-lg animate-pulse flex-shrink-0" />
+                <div className="w-32 h-24 bg-adm-border rounded-lg animate-pulse flex-shrink-0" />
                 <div className="flex-1 space-y-3">
-                  <div className="h-5 bg-[#E9ECEF] rounded animate-pulse w-2/3" />
-                  <div className="h-4 bg-[#E9ECEF] rounded animate-pulse w-1/3" />
-                  <div className="h-4 bg-[#E9ECEF] rounded animate-pulse w-1/2" />
+                  <div className="h-5 bg-adm-border rounded animate-pulse w-2/3" />
+                  <div className="h-4 bg-adm-border rounded animate-pulse w-1/3" />
+                  <div className="h-4 bg-adm-border rounded animate-pulse w-1/2" />
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function AdminVerificationPage() {
             const isLoading = actionLoading === property.id
 
             return (
-              <div key={property.id} className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden hover:border-[#ADB5BD] transition-colors">
+              <div key={property.id} className="bg-adm-surface rounded-xl border border-adm-border overflow-hidden hover:border-adm-muted transition-colors">
                 <div className="flex flex-col sm:flex-row">
                   {/* Checkbox */}
                   <div className="flex items-start p-4 sm:items-center sm:p-3">
@@ -174,12 +174,12 @@ export default function AdminVerificationPage() {
                       type="checkbox"
                       checked={isSelected(property.id)}
                       onChange={() => toggleSelection(property.id)}
-                      className="w-4 h-4 border-[#E9ECEF] rounded focus:ring-[#212529] cursor-pointer"
+                      className="w-4 h-4 border-adm-border bg-adm-surface-2 rounded focus:ring-adm-accent cursor-pointer"
                     />
                   </div>
 
                   {/* Image */}
-                  <div className="relative w-full sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-[#F8F9FA]">
+                  <div className="relative w-full sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-adm-surface-2">
                     {primaryImage?.url ? (
                       <Image
                         src={primaryImage.url}
@@ -195,7 +195,7 @@ export default function AdminVerificationPage() {
                     )}
                     <div className="absolute top-2 left-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${
-                        isForSale ? 'bg-[#212529] text-white' : 'bg-white/90 text-[#212529] backdrop-blur-sm'
+                        isForSale ? 'bg-adm-accent text-white' : 'bg-adm-surface/90 text-adm-text backdrop-blur-sm'
                       }`}>
                         {isForSale ? 'Sale' : 'Rent'}
                       </span>
@@ -206,19 +206,19 @@ export default function AdminVerificationPage() {
                   <div className="flex-1 p-5">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <h3 className="text-base font-semibold text-[#212529]">{property.title}</h3>
-                        <p className="text-sm text-[#ADB5BD] flex items-center gap-1 mt-0.5">
+                        <h3 className="text-base font-semibold text-adm-text">{property.title}</h3>
+                        <p className="text-sm text-adm-faint flex items-center gap-1 mt-0.5">
                           <MapPin size={ICON_SIZES.sm} />
                           {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city}
                         </p>
                       </div>
-                      <p className="text-lg font-bold text-[#212529] flex-shrink-0">
+                      <p className="text-lg font-bold text-adm-text flex-shrink-0">
                         {displayPrice}{!isForSale && <span className="text-xs text-[#ADB5BD] font-normal">/mo</span>}
                       </p>
                     </div>
 
                     {/* Property specs */}
-                    <div className="flex items-center gap-4 text-sm text-[#495057] mb-3">
+                    <div className="flex items-center gap-4 text-sm text-adm-muted mb-3">
                       {property.property_type && (
                         <span className="capitalize">{property.property_type}</span>
                       )}
@@ -230,8 +230,8 @@ export default function AdminVerificationPage() {
                     </div>
 
                     {/* Owner info */}
-                    <div className="flex items-center gap-2 mb-4 text-xs text-[#ADB5BD]">
-                      <div className="w-5 h-5 rounded-full bg-[#F8F9FA] flex items-center justify-center text-[9px] font-bold text-[#495057] flex-shrink-0">
+                    <div className="flex items-center gap-2 mb-4 text-xs text-adm-faint">
+                      <div className="w-5 h-5 rounded-full bg-adm-surface-2 flex items-center justify-center text-[9px] font-bold text-adm-muted flex-shrink-0">
                         {(owner?.name || owner?.email || '?')[0].toUpperCase()}
                       </div>
                       <span>{owner?.name || 'Unknown'}</span>
@@ -243,27 +243,27 @@ export default function AdminVerificationPage() {
 
                     {/* Rejection form */}
                     {isRejecting && (
-                      <div className="mb-4 p-3 bg-[#FFF5F5] border border-red-100 rounded-lg">
-                        <label className="block text-xs font-semibold text-[#495057] mb-1.5">Rejection Reason (optional)</label>
+                      <div className="mb-4 p-3 bg-adm-red/5 border border-adm-red/20 rounded-lg">
+                        <label className="block text-xs font-semibold text-adm-muted mb-1.5">Rejection Reason (optional)</label>
                         <textarea
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                           placeholder="Explain why this property was rejected..."
                           rows={2}
-                          className="w-full px-3 py-2 text-sm border border-red-200 rounded-lg focus:outline-none focus:border-[#FF6B6B] transition-colors resize-none"
+                          className="w-full px-3 py-2 text-sm bg-adm-surface-2 text-adm-text border border-adm-red/30 rounded-lg focus:outline-none focus:border-adm-red transition-colors resize-none"
                         />
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => handleAction(property.id, 'reject', rejectReason)}
                             disabled={isLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF6B6B] text-white text-xs font-semibold rounded-lg hover:bg-[#FF6B6B]/90 disabled:opacity-50 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-adm-red text-white text-xs font-semibold rounded-lg hover:bg-adm-red/90 disabled:opacity-50 transition-colors"
                           >
                             {isLoading ? <Loader2 size={ICON_SIZES.xs} className="animate-spin" /> : <ShieldX size={ICON_SIZES.xs} />}
                             Confirm Reject
                           </button>
                           <button
                             onClick={() => { setRejectingId(null); setRejectReason('') }}
-                            className="px-3 py-1.5 text-xs text-[#495057] font-medium hover:text-[#212529] transition-colors"
+                            className="px-3 py-1.5 text-xs text-adm-muted font-medium hover:text-adm-text transition-colors"
                           >
                             Cancel
                           </button>
@@ -286,7 +286,7 @@ export default function AdminVerificationPage() {
                         <button
                           onClick={() => setRejectingId(property.id)}
                           disabled={isLoading}
-                          className="flex items-center gap-1.5 px-4 py-2 border-2 border-[#FF6B6B] text-[#FF6B6B] text-sm font-semibold rounded-lg hover:bg-[#FFF5F5] disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1.5 px-4 py-2 border-2 border-adm-red text-adm-red text-sm font-semibold rounded-lg hover:bg-adm-red/10 disabled:opacity-50 transition-colors"
                         >
                           <X size={ICON_SIZES.sm} />
                           Reject
@@ -294,7 +294,7 @@ export default function AdminVerificationPage() {
                         <Link
                           href={`/property/${property.slug || property.id}`}
                           target="_blank"
-                          className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#495057] hover:text-[#212529] transition-colors ml-auto"
+                          className="flex items-center gap-1.5 px-3 py-2 text-sm text-adm-muted hover:text-adm-text transition-colors ml-auto"
                         >
                           <ExternalLink size={ICON_SIZES.sm} />
                           View

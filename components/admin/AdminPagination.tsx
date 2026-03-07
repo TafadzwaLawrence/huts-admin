@@ -18,17 +18,17 @@ export function AdminPagination({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-[#E9ECEF] text-[#495057] hover:border-[#212529] disabled:opacity-30 disabled:hover:border-[#E9ECEF] transition-colors"
+        className="p-2 rounded-lg border border-adm-border text-adm-muted hover:border-adm-faint hover:text-adm-text disabled:opacity-30 transition-colors"
       >
         <ChevronLeft size={16} />
       </button>
-      <span className="text-sm text-[#495057] px-3">
+      <span className="text-sm text-adm-muted px-3">
         Page {currentPage} of {totalPages}
       </span>
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-[#E9ECEF] text-[#495057] hover:border-[#212529] disabled:opacity-30 disabled:hover:border-[#E9ECEF] transition-colors"
+        className="p-2 rounded-lg border border-adm-border text-adm-muted hover:border-adm-faint hover:text-adm-text disabled:opacity-30 transition-colors"
       >
         <ChevronRight size={16} />
       </button>

@@ -84,6 +84,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Enforce MFA (AAL2) — redirect back to login if the user has not completed
+  // their second factor yet (e.g. fresh credentials-only session).
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal && aal.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
   return response
 }
 

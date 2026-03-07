@@ -40,7 +40,6 @@ export default function LoginPage() {
         const totpFactor = factorData?.totp?.[0]
         if (!totpFactor) {
           // MFA is required but the account has no TOTP factor enrolled.
-          // Sign out immediately so the session is not left in a partial state.
           await supabase.auth.signOut()
           setError('Two-factor authentication is required for this account. Please enroll a TOTP authenticator app and try again.')
           return
@@ -54,11 +53,6 @@ export default function LoginPage() {
           setStep('otp')
           return
         }
-      } else if (!assurance || assurance.nextLevel !== 'aal2') {
-        // MFA is not configured at the project level — block access entirely.
-        await supabase.auth.signOut()
-        setError('Two-factor authentication is required but is not enabled on this account. Contact your administrator.')
-        return
       }
 
       router.push(searchParams.get('next') || '/')

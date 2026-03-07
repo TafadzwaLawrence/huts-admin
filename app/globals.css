@@ -1,0 +1,752 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   HUTS SPACING SYSTEM
+   ============================================
+   
+   CONTAINERS (Horizontal Padding):
+   - Standard: px-4 sm:px-6 lg:px-8
+   - Max-width: max-w-7xl (1280px) or max-w-6xl (1152px)
+   
+   SECTIONS (Vertical Padding):
+   - Standard: py-12 md:py-16
+   - Hero: py-20 md:py-32
+   
+   CARDS (Internal Padding):
+   - Compact: p-4 (small cards, list items)
+   - Standard: p-6 (property cards, forms, reviews)
+   - Feature: p-8 (large feature cards, settings)
+   
+   GRID GAPS:
+   - Tight: gap-3 (amenity pills, inline elements)
+   - Standard: gap-6 (card grids, default layouts)
+   - Responsive: gap-6 lg:gap-8 (main property grids)
+   
+   BUTTONS:
+   - Compact: px-3 py-1.5 (navbar, inline links)
+   - Standard: px-6 py-2 (forms, secondary actions)
+   - Large: px-8 py-4 (CTAs, primary actions)
+   - Hero: px-10 py-5 (homepage hero CTAs)
+   
+   HEADINGS (Bottom Margins):
+   - h1: mb-6 (page titles)
+   - h2: mb-4 (section titles)
+   - h3: mb-3 (subsections)
+   - h4: mb-2 (card titles, small headers)
+   
+   TEXT STACKING:
+   - Tight: space-y-2 (related items)
+   - Standard: space-y-4 (list items, paragraphs)
+   - Forms: space-y-6 (form fields)
+   - Sections: space-y-8 or space-y-12 (page sections)
+   
+   ============================================ */
+
+/* NProgress - Route transition progress bar */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: #212529;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #212529, 0 0 5px #212529;
+  opacity: 1;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* ============================================
+   HUTS B&W DESIGN SYSTEM
+   95% Black & White, 5% color for necessities
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Core B&W Palette */
+    --pure-white: 0 0% 100%;
+    --off-white: 210 17% 98%;
+    --light-gray: 210 16% 93%;
+    --medium-gray: 210 14% 70%;
+    --dark-gray: 210 11% 31%;
+    --charcoal: 210 11% 15%;
+    --pure-black: 0 0% 0%;
+    
+    /* Functional Colors (use sparingly) */
+    --accent-red: 0 100% 71%;
+    --accent-green: 135 59% 56%;
+    
+    /* Shadcn/ui compatibility */
+    --background: var(--pure-white);
+    --foreground: var(--charcoal);
+    --card: var(--pure-white);
+    --card-foreground: var(--charcoal);
+    --popover: var(--pure-white);
+    --popover-foreground: var(--charcoal);
+    --primary: var(--pure-black);
+    --primary-foreground: var(--pure-white);
+    --secondary: var(--light-gray);
+    --secondary-foreground: var(--charcoal);
+    --muted: var(--off-white);
+    --muted-foreground: var(--dark-gray);
+    --accent: var(--off-white);
+    --accent-foreground: var(--charcoal);
+    --destructive: var(--accent-red);
+    --destructive-foreground: var(--pure-white);
+    --border: var(--light-gray);
+    --input: var(--light-gray);
+    --ring: var(--pure-black);
+    --radius: 0.5rem;
+  }
+
+  /* Dark Mode - Inverted */
+  .dark, [data-theme="dark"] {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
+    --primary: var(--pure-white);
+    --primary-foreground: var(--pure-black);
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 95%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: var(--pure-white);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: 0 0% 7%;
+      --foreground: 0 0% 95%;
+      --card: 0 0% 10%;
+      --card-foreground: 0 0% 95%;
+      --popover: 0 0% 10%;
+      --popover-foreground: 0 0% 95%;
+      --primary: var(--pure-white);
+      --primary-foreground: var(--pure-black);
+      --secondary: 0 0% 15%;
+      --secondary-foreground: 0 0% 95%;
+      --muted: 0 0% 15%;
+      --muted-foreground: 0 0% 65%;
+      --accent: 0 0% 15%;
+      --accent-foreground: 0 0% 95%;
+      --border: 0 0% 20%;
+      --input: 0 0% 20%;
+      --ring: var(--pure-white);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Font is applied via inter.className in layout.tsx */
+  }
+
+  /* Focus states - CRITICAL for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-black;
+  }
+
+  .dark *:focus-visible {
+    @apply outline-white;
+  }
+}
+
+/* ============================================
+   TYPOGRAPHY
+   Standardized typography scale for consistency.
+   Use these classes across all pages/components.
+   Colors use semantic tokens for dark mode support.
+   ============================================ */
+
+@layer components {
+  /* Hero: Landing page hero headlines */
+  .text-hero {
+    @apply text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground;
+  }
+
+  /* Page Title: Top-level page headings (h1) */
+  .text-page-title {
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-foreground;
+  }
+
+  /* Section Title: Major section headings (h2) */
+  .text-section-title {
+    @apply text-2xl md:text-3xl font-bold text-foreground;
+  }
+
+  /* Subsection Title: Subsection headings (h3) */
+  .text-subsection-title {
+    @apply text-xl font-bold text-foreground;
+  }
+
+  /* Card Title: Card and list item headings */
+  .text-card-title {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  /* Card Title Small: Compact card headings */
+  .text-card-title-sm {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  /* Label: Form labels, small headers, sidebar headings */
+  .text-label {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  /* Body: Default body text */
+  .text-body {
+    @apply text-base text-foreground;
+  }
+
+  /* Body Large: Descriptions under headings */
+  .text-body-lg {
+    @apply text-lg text-muted-foreground;
+  }
+
+  /* Secondary: Supporting body text */
+  .text-secondary {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Small: Captions, timestamps, meta info */
+  .text-small {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* Stat: Large numeric values in dashboards/cards */
+  .text-stat {
+    @apply text-3xl font-bold text-foreground tabular-nums;
+  }
+
+  /* Stat Small: Compact numeric values */
+  .text-stat-sm {
+    @apply text-2xl font-bold text-foreground tabular-nums;
+  }
+
+  /* Stat Label: Labels below stat values */
+  .text-stat-label {
+    @apply text-xs text-muted-foreground font-medium;
+  }
+
+  /* Badge text */
+  .text-badge {
+    @apply text-xs font-bold uppercase tracking-wider;
+  }
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold;
+    @apply transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-[#212529] text-white border-2 border-[#212529];
+    @apply hover:bg-black hover:-translate-y-1 hover:shadow-xl;
+    @apply active:translate-y-0 active:shadow-lg;
+    @apply focus-visible:ring-[#212529]/20;
+  }
+
+  .dark .btn-primary {
+    @apply bg-white text-black border-white hover:bg-gray-200;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-[#212529] border-2 border-[#E9ECEF];
+    @apply hover:border-[#212529] hover:shadow-md hover:-translate-y-0.5;
+    @apply active:translate-y-0;
+    @apply focus-visible:ring-[#212529]/20;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-transparent text-white border-gray-700 hover:border-white;
+  }
+
+  .btn-ghost {
+    @apply btn hover:bg-[#F8F9FA] border-2 border-transparent;
+  }
+
+  .dark .btn-ghost {
+    @apply hover:bg-gray-800;
+  }
+
+  .btn-icon {
+    @apply btn p-2.5 w-10 h-10;
+  }
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+@layer components {
+  .property-card {
+    @apply cursor-pointer border border-[#E9ECEF] rounded-lg overflow-hidden bg-white;
+    transition: all 0.2s ease;
+  }
+  
+  .property-card:hover {
+    @apply border-[#212529] shadow-lg;
+  }
+
+  .dark .property-card {
+    @apply border-gray-700 hover:border-gray-400 bg-gray-900;
+  }
+
+  .property-card-image {
+    @apply relative h-44 overflow-hidden bg-[#F8F9FA];
+  }
+
+  .property-card-image img {
+    @apply object-cover w-full h-full transition-transform duration-500 group-hover:scale-105;
+  }
+
+  .property-card-badge {
+    @apply absolute top-3 left-3 bg-black/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow-lg;
+  }
+
+  .property-card-content {
+    @apply px-4 py-3;
+  }
+
+  .property-card-features {
+    @apply flex gap-4 text-sm border-t border-[#E9ECEF] pt-3 mt-4;
+  }
+
+  .dark .property-card-features {
+    @apply border-gray-700;
+  }
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+
+@layer components {
+  .input {
+    @apply flex h-10 w-full rounded-xl border-2 border-[#E9ECEF] bg-white px-4 py-2 text-sm;
+    @apply placeholder:text-[#ADB5BD];
+    @apply transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:border-[#212529] focus-visible:ring-4 focus-visible:ring-[#212529]/10;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .input:hover:not(:disabled) {
+    @apply border-[#495057];
+  }
+
+  .dark .input {
+    @apply bg-gray-900 border-gray-700;
+  }
+  
+  .dark .input:focus {
+    @apply border-white ring-white/10;
+  }
+
+  .label {
+    @apply text-sm font-medium leading-none text-[#212529] mb-2;
+    @apply peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+  }
+  
+  .textarea {
+    @apply min-h-[120px] w-full rounded-xl border-2 border-[#E9ECEF] bg-white px-4 py-3 text-sm;
+    @apply placeholder:text-[#ADB5BD] resize-none;
+    @apply transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:border-[#212529] focus-visible:ring-4 focus-visible:ring-[#212529]/10;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .textarea:hover:not(:disabled) {
+    @apply border-[#495057];
+  }
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+
+@layer components {
+  .container-main {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .grid-properties {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8;
+  }
+
+  .section {
+    @apply py-12 md:py-16;
+  }
+
+  .section-hero {
+    @apply py-20 md:py-32;
+  }
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+@layer components {
+  .nav-link {
+    @apply text-sm font-medium text-[#495057] hover:text-black underline-offset-4 hover:underline transition-colors;
+  }
+
+  .dark .nav-link {
+    @apply text-gray-400 hover:text-white;
+  }
+
+  .nav-link-active {
+    @apply text-black font-semibold underline;
+  }
+
+  .dark .nav-link-active {
+    @apply text-white;
+  }
+
+  /* Mobile bottom navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-[#E9ECEF] py-2 px-4 flex justify-around items-center md:hidden z-50;
+  }
+
+  .dark .bottom-nav {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center gap-1 text-xs text-[#495057] min-w-[44px] min-h-[44px] justify-center;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-black font-medium;
+  }
+
+  .dark .bottom-nav-item {
+    @apply text-gray-400;
+  }
+
+  .dark .bottom-nav-item.active {
+    @apply text-white;
+  }
+}
+
+/* ============================================
+   SKELETON LOADING (B&W)
+   ============================================ */
+
+@layer components {
+  .skeleton {
+    @apply animate-pulse bg-[#E9ECEF] rounded;
+  }
+
+  .dark .skeleton {
+    @apply bg-gray-700;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+
+  .skeleton-title {
+    @apply skeleton h-6 w-3/4;
+  }
+
+  .skeleton-image {
+    @apply skeleton h-48 w-full;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton h-10 w-10 rounded-full;
+  }
+}
+
+/* ============================================
+   MICRO-INTERACTIONS
+   ============================================ */
+
+@layer utilities {
+  /* Heart save animation */
+  .heart-animation {
+    @apply transition-transform duration-200 active:scale-125;
+  }
+
+  /* Subtle lift on hover */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  /* Card hover states - standardized */
+  .card-hover {
+    @apply transition-all duration-300 hover:border-[#212529] hover:shadow-xl hover:-translate-y-1;
+  }
+  
+  .card-hover-subtle {
+    @apply transition-all duration-200 hover:border-[#212529] hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  /* Focus ring utility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-[#212529]/10 focus:border-[#212529];
+  }
+
+  /* Shadow utilities - standardized */
+  .shadow-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+  
+  .shadow-elevated {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+  
+  .shadow-button {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduce motion for those who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip to main content link */
+.skip-link {
+  @apply absolute -top-10 left-0 bg-black text-white px-4 py-2 z-50 focus:top-0 transition-all;
+}
+
+/* Screen reader only */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* ============================================
+   SCROLLBAR (subtle B&W)
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F9FA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ADB5BD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #495057;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6a6a6a;
+}
+
+/* ============================================
+   ANIMATIONS & INTERACTIONS
+   ============================================ */
+
+@layer utilities {
+  /* Smooth hover lift */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+  
+  /* Smooth scale on hover */
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  /* Slide up animation */
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-[#E9ECEF] rounded;
+  }
+  
+  /* Smooth focus ring */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-[#212529]/10 focus:border-[#212529];
+  }
+  
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+  
+  .dark .glass {
+    @apply bg-gray-900/80 border-gray-700/20;
+  }
+
+  /* Map marker bounce */
+  .marker-bounce {
+    animation: markerBounce 0.5s ease-out;
+  }
+
+  /* Staggered fade in for lists */
+  .stagger-fade > * {
+    animation: fadeIn 0.3s ease-in both;
+  }
+  .stagger-fade > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-fade > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-fade > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-fade > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-fade > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-fade > *:nth-child(6) { animation-delay: 250ms; }
+
+  /* Pulse dot for unread indicators */
+  .pulse-dot {
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+
+  /* Shimmer loading effect (alternative to plain pulse) */
+  .shimmer {
+    background: linear-gradient(90deg, #E9ECEF 25%, #F8F9FA 50%, #E9ECEF 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes markerBounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-12px); }
+  60% { transform: translateY(-4px); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   IMPROVED FOCUS STATES (Accessibility)
+   ============================================ */
+
+@layer base {
+  *:focus-visible {
+    @apply outline-none ring-4 ring-[#212529]/20 ring-offset-2;
+  }
+  
+  button:focus-visible,
+  a:focus-visible {
+    @apply outline-none ring-4 ring-[#212529]/20 ring-offset-2;
+  }
+  
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-4 ring-[#212529]/10 border-[#212529];
+  }
+  
+  .dark *:focus-visible {
+    @apply ring-white/20;
+  }
+}

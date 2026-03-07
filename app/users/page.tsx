@@ -1,0 +1,236 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { 
+  Users, 
+  Building2,
+  Home,
+  Mail,
+  Phone,
+  Calendar,
+} from 'lucide-react'
+import { AdminPageHeader, AdminEmptyState, AdminPagination, BulkActionToolbar, useAdminSelection, AdminExportButton } from '@/components/admin'
+import { Badge } from '@/components/ui'
+import { ICON_SIZES } from '@/lib/constants'
+
+interface User {
+  id: string
+  name: string | null
+  email: string
+  phone: string | null
+  role: string
+  avatar_url: string | null
+  verified: boolean | null
+  bio: string | null
+  created_at: string | null
+}
+
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [roleFilter, setRoleFilter] = useState('all')
+  
+  // Bulk selection state
+  const {
+    selectedIds,
+    selectedCount,
+    toggleSelection,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+  } = useAdminSelection(users)
+
+  const fetchUsers = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/users?role=${roleFilter}&page=${page}&limit=20`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setUsers(data.users)
+      setTotalPages(data.totalPages)
+      setTotal(data.total)
+      clearSelection() // Clear selection when data changes
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    setPage(1)
+  }, [roleFilter])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [page, roleFilter])
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <AdminPageHeader
+        title="Users"
+        description={`${total} total users`}
+        action={
+          <div className="flex items-center gap-3">
+            <AdminExportButton type="users" />
+            <div className="flex items-center gap-0.5 bg-[#F8F9FA] p-0.5 rounded-full border border-[#E9ECEF]">
+              {['all', 'landlord', 'renter'].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRoleFilter(r)}
+                  className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    roleFilter === r
+                      ? 'bg-[#212529] text-white shadow-sm'
+                      : 'text-[#495057] hover:text-[#212529]'
+                  }`}
+                >
+                  {r === 'all' ? 'All' : r.charAt(0).toUpperCase() + r.slice(1) + 's'}
+                </button>
+              ))}
+            </div>
+          </div>
+        }
+      />
+
+      {loading ? (
+        <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#E9ECEF]">
+              <div className="w-10 h-10 bg-[#E9ECEF] rounded-full animate-pulse flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-[#E9ECEF] rounded animate-pulse w-1/3" />
+                <div className="h-3 bg-[#E9ECEF] rounded animate-pulse w-1/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : users.length === 0 ? (
+        <AdminEmptyState
+          icon={Users}
+          title="No users found"
+          description={roleFilter !== 'all' ? `No ${roleFilter}s found` : 'No users in the system'}
+        />
+      ) : (
+        <>
+          <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden">
+            {/* Table Header */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-[#F8F9FA] text-[10px] font-semibold text-[#ADB5BD] uppercase tracking-wider border-b border-[#E9ECEF]">
+              <div className="col-span-1 flex items-center">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={toggleAll}
+                  className="w-4 h-4 border-light-gray rounded focus:ring-charcoal cursor-pointer"
+                />
+              </div>
+              <div className="col-span-2">User</div>
+              <div className="col-span-3">Contact</div>
+              <div className="col-span-2">Role</div>
+              <div className="col-span-2">Joined</div>
+              <div className="col-span-1">Verified</div>
+              <div className="col-span-1">Actions</div>
+            </div>
+
+            <div className="divide-y divide-[#E9ECEF]">
+              {users.map((u) => (
+                <div key={u.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-center px-5 py-3.5 hover:bg-[#F8F9FA] transition-colors">
+                  {/* Checkbox */}
+                  <div className="md:col-span-1 flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected(u.id)}
+                      onChange={() => toggleSelection(u.id)}
+                      className="w-4 h-4 border-light-gray rounded focus:ring-charcoal cursor-pointer"
+                    />
+                  </div>
+                  
+                  {/* User */}
+                  <div className="md:col-span-2 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#F8F9FA] flex items-center justify-center text-sm font-bold text-[#495057] flex-shrink-0 border border-[#E9ECEF]">
+                      {(u.name || u.email || '?')[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[#212529] truncate">{u.name || 'No name'}</p>
+                      <p className="text-xs text-[#ADB5BD] truncate md:hidden">{u.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Contact */}
+                  <div className="md:col-span-3 hidden md:block min-w-0">
+                    <p className="text-xs text-[#495057] truncate flex items-center gap-1">
+                      <Mail size={ICON_SIZES.xs} className="flex-shrink-0" /> {u.email}
+                    </p>
+                    {u.phone && (
+                      <p className="text-xs text-[#ADB5BD] truncate flex items-center gap-1 mt-0.5">
+                        <Phone size={ICON_SIZES.xs} className="flex-shrink-0" /> {u.phone}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Role */}
+                  <div className="md:col-span-2">
+                    <Badge variant="default" size="sm">
+                      {u.role === 'landlord' ? (
+                        <><Building2 size={ICON_SIZES.xs} /> Landlord</>
+                      ) : (
+                        <><Home size={ICON_SIZES.xs} /> Renter</>
+                      )}
+                    </Badge>
+                  </div>
+
+                  {/* Joined */}
+                  <div className="md:col-span-2 hidden md:block">
+                    <p className="text-xs text-[#ADB5BD] flex items-center gap-1">
+                      <Calendar size={ICON_SIZES.xs} />
+                      {u.created_at 
+                        ? new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : '—'
+                      }
+                    </p>
+                  </div>
+
+                  {/* Verified */}
+                  <div className="md:col-span-1 hidden md:block">
+                    <span className={`w-2 h-2 rounded-full inline-block ${u.verified ? 'bg-[#51CF66]' : 'bg-[#E9ECEF]'}`} />
+                  </div>
+
+                  {/* Actions */}
+                  <div className="md:col-span-1">
+                    <Link
+                      href={`/users/${u.id}`}
+                      className="text-xs text-[#212529] hover:text-[#495057] font-medium underline"
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <AdminPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
+      )}
+
+      {/* Bulk Action Toolbar */}
+      <BulkActionToolbar
+        selectedCount={selectedCount}
+        resourceType="user"
+        selectedIds={selectedIds}
+        onActionComplete={fetchUsers}
+        onClearSelection={clearSelection}
+      />
+    </div>
+  )
+}

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Shield, Eye, EyeOff, ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
+import { Shield, Eye, EyeOff, ArrowLeft, Loader2, AlertCircle, Chrome } from 'lucide-react'
 
 type Step = 'credentials' | 'otp'
 
@@ -111,6 +111,27 @@ export default function LoginPage() {
     otpInputs.current[Math.min(digits.length, 5)]?.focus()
   }
 
+  const handleGoogleSignIn = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const supabase = createClient()
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(searchParams.get('next') || '/')}`,
+        },
+      })
+      if (oauthError) {
+        setError(oauthError.message)
+      }
+    } catch {
+      setError('Failed to start Google sign in. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-adm-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fadeIn">
@@ -188,6 +209,25 @@ export default function LoginPage() {
               >
                 {loading && <Loader2 size={15} className="animate-spin" />}
                 {loading ? 'Signing in…' : 'Sign in'}
+              </button>
+
+              <div className="relative mt-5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-adm-border"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-adm-surface text-adm-muted">or continue with</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full py-2.5 bg-adm-surface-2 border border-adm-border text-adm-text text-sm font-semibold rounded-xl hover:bg-adm-surface transition-colors active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Chrome size={15} />
+                Google
               </button>
             </form>
           ) : (

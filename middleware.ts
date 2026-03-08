@@ -9,10 +9,11 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Public routes — login and unauthorized pages are always accessible
+  // Public routes — login, unauthorized, and OAuth callback are always accessible
   if (
     pathname.startsWith('/login') ||
     pathname.startsWith('/unauthorized') ||
+    pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon')
   ) {

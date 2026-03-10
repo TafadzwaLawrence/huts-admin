@@ -24,7 +24,7 @@ export async function checkIsAdmin() {
 export async function requireAdmin() {
   const { isAdmin, user } = await checkIsAdmin()
 
-  if (!isAdmin) {
+  if (!isAdmin || !user) {
     throw new Error('Unauthorized: Admin access required')
   }
 

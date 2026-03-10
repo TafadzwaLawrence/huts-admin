@@ -7,9 +7,10 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'chitangalawrence03@gmail.com'
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -42,7 +43,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('agent_profiles')
       .update({ ...allowed, updated_at: new Date().toISOString() })
-      .eq('id', params.id)
+      .eq('id', id)
       .select('id, status, verified, featured')
       .single()
 
@@ -57,9 +58,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -73,7 +75,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('agent_profiles')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 

@@ -5,11 +5,11 @@ import { requireAdmin, logAdminActivity } from '@/lib/admin'
 // PATCH /api/properties/[id] - Update property fields or toggle status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user: adminUser } = await requireAdmin()
-    const propertyId = params.id
+    const { id: propertyId } = await params
     const body = await request.json()
 
     const allowed: Record<string, unknown> = {}
@@ -84,11 +84,11 @@ export async function PATCH(
 // DELETE /api/properties/[id] - Hard delete a property
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user: adminUser } = await requireAdmin()
-    const propertyId = params.id
+    const { id: propertyId } = await params
 
     const admin = createAdminClient()
 

@@ -5,13 +5,13 @@ import { requireAdmin, logAdminActivity } from '@/lib/admin'
 // PATCH /api/users/[id] - Update user details
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin access
     const { user: adminUser } = await requireAdmin()
 
-    const userId = params.id
+    const { id: userId } = await params
     const body = await request.json()
     const { name, role, verified, is_admin } = body
 
@@ -65,13 +65,13 @@ export async function PATCH(
 // DELETE /api/users/[id] - Delete user (soft delete or hard delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin access
     const { user: adminUser } = await requireAdmin()
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // For now, we'll do a hard delete
     // In production, you might want to soft delete by setting a deleted_at timestamp
@@ -114,13 +114,13 @@ export async function DELETE(
 // GET /api/users/[id] - Get user details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin access
     await requireAdmin()
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Fetch user details
     const admin = createAdminClient()

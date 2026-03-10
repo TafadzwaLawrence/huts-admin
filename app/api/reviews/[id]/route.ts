@@ -5,11 +5,11 @@ import { requireAdmin, logAdminActivity } from '@/lib/admin'
 // DELETE /api/reviews/[id] - Hard delete a review
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user: adminUser } = await requireAdmin()
-    const reviewId = params.id
+    const { id: reviewId } = await params
 
     const admin = createAdminClient()
 

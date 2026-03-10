@@ -1,6 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { ClerkShell } from './clerk-shell'
+import { currentUser } from '@clerk/nextjs/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/admin/Sidebar'
 
 export const metadata: Metadata = {
@@ -8,7 +10,6 @@ export const metadata: Metadata = {
   description: 'Huts platform administration',
   robots: { index: false, follow: false },
   manifest: '/manifest.json',
-  themeColor: '#0D1117',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -16,18 +17,22 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#0D1117',
+}
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const clerkUser = await currentUser()
+  const user = clerkUser
+    ? { email: clerkUser.emailAddresses[0]?.emailAddress ?? null }
+    : null
 
   let pendingCount = 0
-  if (user) {
+  if (user && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
     try {
       const admin = createAdminClient()
       const { count } = await admin
@@ -48,19 +53,21 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="bg-adm-bg text-adm-text antialiased">
-        {user ? (
-          <>
-            <Sidebar user={user} pendingCount={pendingCount} />
-            <main className="lg:pl-60 pt-14 lg:pt-0 min-h-screen">
-              <div className="p-4 sm:p-6 lg:p-8">
-                {children}
-              </div>
-            </main>
-          </>
-        ) : (
-          children
-        )}
+      <body className="bg-adm-bg text-adm-text antialiased" suppressHydrationWarning>
+        <ClerkShell>
+          {user ? (
+            <>
+              <Sidebar user={user} pendingCount={pendingCount} />
+              <main className="lg:pl-60 pt-14 lg:pt-0 min-h-screen">
+                <div className="p-4 sm:p-6 lg:p-8">
+                  {children}
+                </div>
+              </main>
+            </>
+          ) : (
+            children
+          )}
+        </ClerkShell>
       </body>
     </html>
   )

@@ -14,6 +14,14 @@ import { AdminStatCard, AdminBadge } from '@/components/admin'
 export const metadata = { title: 'Dashboard | Huts Admin' }
 
 export default async function AdminOverviewPage() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-adm-faint text-sm">Configure your Supabase environment variables to view the dashboard.</p>
+      </div>
+    )
+  }
+
   const admin = createAdminClient()
 
   const [

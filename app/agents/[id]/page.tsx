@@ -8,14 +8,15 @@ import {
 import { AGENT_TYPE_LABELS, AGENT_SPECIALIZATION_LABELS } from '@/lib/constants'
 import AdminAgentActions from './AdminAgentActions'
 
-type Props = { params: { id: string } }
+type Props = { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props) {
+  const { id } = await params
   const supabase = await createClient()
   const { data } = await supabase
     .from('agent_profiles')
     .select('business_name')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
   return { title: `${data?.business_name || 'Agent'} | Admin` }
 }
@@ -29,6 +30,7 @@ const agentTypeIcons: Record<string, any> = {
 }
 
 export default async function AdminAgentDetailPage({ params }: Props) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: agent, error } = await supabase
@@ -39,7 +41,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
       agent_service_areas (city, is_primary),
       agent_reviews (id, rating, status)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !agent) notFound()

@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useState } from 'react'
 import {
@@ -24,6 +25,7 @@ interface SidebarProps {
 export function Sidebar({ user, pendingCount }: SidebarProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const { signOut } = useClerk()
 
   const navContent = (
     <div className="flex flex-col h-full">
@@ -81,15 +83,14 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
             <p className="text-xs text-adm-muted truncate">{user.email ?? ''}</p>
           </div>
         )}
-        <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
+        <button
+            type="button"
+            onClick={() => signOut({ redirectUrl: '/' })}
             className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-adm-muted hover:text-adm-red hover:bg-adm-red/5 transition-all"
           >
             <LogOut size={15} />
             Sign out
           </button>
-        </form>
       </div>
     </div>
   )

@@ -26,10 +26,11 @@ const agentTypeIcons: Record<string, any> = {
 export default async function AdminAgentsPage({
   searchParams,
 }: {
-  searchParams: { status?: string }
+  searchParams: Promise<{ status?: string }>
 }) {
+  const { status } = await searchParams
   const supabase = await createClient()
-  const statusFilter = searchParams.status || 'pending'
+  const statusFilter = status || 'pending'
 
   const { data: agents, error } = await supabase
     .from('agent_profiles')

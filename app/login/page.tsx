@@ -10,7 +10,6 @@ export default function LoginPage() {
   )
 }
 
-import { useRouter, useSearchParams } from 'next/navigation'
 import { Shield, Eye, EyeOff, ArrowLeft, Loader2, AlertCircle, Chrome } from 'lucide-react'
 
 type Step = 'credentials' | 'otp'

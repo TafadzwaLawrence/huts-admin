@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'chitangalawrence03@gmail.com')
-  .split(',')
-  .map(e => e.trim())
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/admin'
 
 export async function PATCH(
   req: Request,
@@ -11,15 +8,8 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-    if (!ADMIN_EMAILS.includes(user.email || '')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await requireAdmin()
+    const supabase = await createAdminClient()
 
     const body = await req.json()
     const allowed: Record<string, unknown> = {}
@@ -62,15 +52,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-    if (!ADMIN_EMAILS.includes(user.email || '')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await requireAdmin()
+    const supabase = await createAdminClient()
 
     const { error } = await supabase
       .from('agent_profiles')

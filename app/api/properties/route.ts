@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { logAdminActivity } from '@/lib/admin'
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin, logAdminActivity } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'chitangalawrence03@gmail.com').split(',').map(e => e.trim())
-
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
+    await requireAdmin()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // pending, approved, rejected, all
@@ -59,12 +52,7 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
+    const { user } = await requireAdmin()
 
     const body = await request.json()
     const { propertyId, action, reason } = body

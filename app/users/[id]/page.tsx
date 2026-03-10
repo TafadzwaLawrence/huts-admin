@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { requireAdmin } from '@/lib/admin'
 import EditUserForm from '@/app/users/[id]/EditUserForm'
@@ -14,8 +13,6 @@ interface PageProps {
 }
 
 async function UserDetails({ userId }: { userId: string }) {
-  const supabase = await createClient()
-  
   // Fetch user details with stats
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/users/${userId}`,

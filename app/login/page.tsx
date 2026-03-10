@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { SignIn } from '@clerk/nextjs'
+
+export default function LoginPage() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-adm-bg">
+      <SignIn routing="hash" />
+    </div>
+  )
+}
+
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Shield, Eye, EyeOff, ArrowLeft, Loader2, AlertCircle, Chrome } from 'lucide-react'
 

@@ -8,6 +8,7 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
 
 function isPublicRoute(pathname: string) {
   return (
+    pathname.startsWith('/login') ||
     pathname.startsWith('/unauthorized') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -24,9 +25,9 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
 
   const { userId, sessionClaims } = await auth()
 
-  // Not signed in → Clerk will redirect to its sign-in page
+  // Not signed in → redirect to login
   if (!userId) {
-    const signInUrl = new URL('/sign-in', request.url)
+    const signInUrl = new URL('/login', request.url)
     signInUrl.searchParams.set('redirect_url', request.url)
     return NextResponse.redirect(signInUrl)
   }

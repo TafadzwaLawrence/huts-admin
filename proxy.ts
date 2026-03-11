@@ -1,11 +1,6 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
-  .split(',')
-  .map((e) => e.trim())
-  .filter(Boolean)
-
 function isPublicRoute(pathname: string) {
   return (
     pathname.startsWith('/login') ||
@@ -23,19 +18,13 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
     return NextResponse.next()
   }
 
-  const { userId, sessionClaims } = await auth()
+  const { userId } = await auth()
 
   // Not signed in → redirect to login
   if (!userId) {
     const signInUrl = new URL('/login', request.url)
     signInUrl.searchParams.set('redirect_url', request.url)
     return NextResponse.redirect(signInUrl)
-  }
-
-  // Signed in — check admin email allowlist
-  const email: string = (sessionClaims?.email as string) ?? ''
-  if (ADMIN_EMAILS.length > 0 && !ADMIN_EMAILS.includes(email)) {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
   return NextResponse.next()

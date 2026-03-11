@@ -4,6 +4,7 @@ import { ClerkShell } from './clerk-shell'
 import { currentUser } from '@clerk/nextjs/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/admin/Sidebar'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: { default: 'Huts Admin', template: '%s | Huts Admin' },
@@ -27,9 +28,18 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const clerkUser = await currentUser()
-  const user = clerkUser
-    ? { email: clerkUser.emailAddresses[0]?.emailAddress ?? null }
-    : null
+  const email = clerkUser?.emailAddresses[0]?.emailAddress ?? null
+
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim())
+    .filter(Boolean)
+
+  if (clerkUser && ADMIN_EMAILS.length > 0 && email && !ADMIN_EMAILS.includes(email)) {
+    redirect('/unauthorized')
+  }
+
+  const user = clerkUser ? { email } : null
 
   let pendingCount = 0
   if (user && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {

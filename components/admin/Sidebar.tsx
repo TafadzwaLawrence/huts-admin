@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import {
   LayoutDashboard, Building2, Users, ShieldCheck, Briefcase,
-  Menu, X, LogOut, Shield,
+  Menu, X, LogOut,
 } from 'lucide-react'
+import { HutsLogo } from '@/components/HutsLogo'
 
 const NAV = [
   { href: '/',             icon: LayoutDashboard, label: 'Overview'     },
@@ -31,13 +32,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
     <div className="flex flex-col h-full">
       {/* Brand */}
       <div className="flex items-center gap-3 px-5 h-[60px] border-b border-adm-border flex-shrink-0">
-        <div className="w-8 h-8 bg-adm-accent rounded-lg flex items-center justify-center flex-shrink-0">
-          <Shield size={15} className="text-white" />
-        </div>
-        <div>
-          <span className="block text-[10px] font-black tracking-[3px] text-adm-faint leading-none mb-0.5">HUTS</span>
-          <span className="block text-sm font-bold text-adm-text leading-none">Admin</span>
-        </div>
+        <HutsLogo size={36} />
       </div>
 
       {/* Nav Links */}
@@ -105,11 +100,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
       {/* Mobile top bar */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-adm-surface border-b border-adm-border flex items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-adm-accent rounded-md flex items-center justify-center">
-            <Shield size={13} className="text-white" />
-          </div>
-          <span className="text-[10px] font-black tracking-[2px] text-adm-faint">HUTS</span>
-          <span className="text-sm font-bold text-adm-text ml-1">Admin</span>
+          <HutsLogo size={28} />
           {pendingCount > 0 && (
             <span className="ml-1 px-1.5 py-0.5 bg-adm-amber/20 text-adm-amber rounded text-[10px] font-bold">
               {pendingCount}

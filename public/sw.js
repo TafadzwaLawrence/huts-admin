@@ -1,4 +1,4 @@
-const CACHE = 'huts-admin-v1'
+const CACHE = 'huts-admin-v2'
 const OFFLINE_URL = '/login'
 
 const PRECACHE = [
@@ -25,6 +25,8 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return
 
   const url = new URL(e.request.url)
+  // Skip non-HTTP(S) schemes (chrome-extension, blob, data, etc.)
+  if (!url.protocol.startsWith('http')) return
   // Skip API routes – always network
   if (url.pathname.startsWith('/api/')) return
 

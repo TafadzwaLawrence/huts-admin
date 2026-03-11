@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ShieldX } from 'lucide-react'
+import { SignOutButton } from '@clerk/nextjs'
 
 export default function UnauthorizedPage() {
   return (
@@ -13,14 +14,13 @@ export default function UnauthorizedPage() {
           You are not authorised to access the Huts admin panel. If you believe
           this is a mistake, contact the platform owner.
         </p>
-        <form action="/api/auth/signout" method="POST">
+        <SignOutButton redirectUrl="/login">
           <button
-            type="submit"
             className="px-5 py-2.5 bg-adm-surface border border-adm-border text-adm-text text-sm font-semibold rounded-xl hover:bg-adm-surface-2 transition-colors"
           >
             Sign out
           </button>
-        </form>
+        </SignOutButton>
       </div>
     </div>
   )

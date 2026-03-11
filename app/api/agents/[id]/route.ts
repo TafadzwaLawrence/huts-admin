@@ -9,7 +9,7 @@ export async function PATCH(
   try {
     const { id } = await params
     await requireAdmin()
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
 
     const body = await req.json()
     const allowed: Record<string, unknown> = {}
@@ -53,7 +53,7 @@ export async function DELETE(
   try {
     const { id } = await params
     await requireAdmin()
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
 
     const { error } = await supabase
       .from('agent_profiles')

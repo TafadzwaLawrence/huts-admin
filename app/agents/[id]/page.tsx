@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -12,8 +13,8 @@ type Props = { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data } = await supabase
+  const admin = createAdminClient()
+  const { data } = await admin
     .from('agent_profiles')
     .select('business_name')
     .eq('id', id)
@@ -31,22 +32,24 @@ const agentTypeIcons: Record<string, any> = {
 
 export default async function AdminAgentDetailPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
+  await requireAdmin()
+  const admin = createAdminClient()
 
-  const { data: agent, error } = await supabase
+  const { data: agent, error } = await admin
     .from('agent_profiles')
-    .select(`
-      *,
-      profiles:user_id (name, email, avatar_url, created_at),
-      agent_service_areas (city, is_primary),
-      agent_reviews (id, rating, status)
-    `)
+    .select('*, agent_service_areas (city, is_primary), agent_reviews (id, rating, status)')
     .eq('id', id)
     .single()
 
   if (error || !agent) notFound()
 
-  const profile = agent.profiles as any
+  // Fetch profile separately to avoid FK join issues
+  const { data: profileData } = await admin
+    .from('profiles')
+    .select('name, email, avatar_url, created_at')
+    .eq('id', agent.user_id)
+    .single()
+  const profile = profileData as any
   const Icon = agentTypeIcons[agent.agent_type] || Award
   const serviceAreas = (agent.agent_service_areas as any[]) || []
   const reviews = (agent.agent_reviews as any[]) || []

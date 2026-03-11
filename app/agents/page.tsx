@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/admin'
 import Link from 'next/link'
 import { 
   Building2, Home, Briefcase, Camera, Award,
@@ -29,22 +30,26 @@ export default async function AdminAgentsPage({
   searchParams: Promise<{ status?: string }>
 }) {
   const { status } = await searchParams
-  const supabase = await createClient()
+  await requireAdmin()
+  const admin = createAdminClient()
   const statusFilter = status || 'pending'
 
-  const { data: agents, error } = await supabase
+  const { data: agentRows, error } = await admin
     .from('agent_profiles')
-    .select(`
-      id, user_id, agent_type, business_name, office_city,
-      phone, verified, status, featured, avg_rating, total_reviews,
-      created_at, slug,
-      profiles:user_id (name, email, avatar_url)
-    `)
+    .select('id, user_id, agent_type, business_name, office_city, phone, verified, status, featured, avg_rating, total_reviews, created_at, slug')
     .eq('status', statusFilter)
     .order('created_at', { ascending: false })
 
+  // Fetch profiles separately to avoid FK join issues
+  const userIds = (agentRows || []).map((a: any) => a.user_id).filter(Boolean)
+  const { data: profileRows } = userIds.length
+    ? await admin.from('profiles').select('id, name, email, avatar_url').in('id', userIds)
+    : { data: [] }
+  const profileMap = Object.fromEntries((profileRows || []).map((p: any) => [p.id, p]))
+  const agents = (agentRows || []).map((a: any) => ({ ...a, profiles: profileMap[a.user_id] ?? null }))
+
   // Count per status for badges
-  const { data: counts } = await supabase
+  const { data: counts } = await admin
     .from('agent_profiles')
     .select('status')
 

@@ -1,8 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Home, Briefcase, Camera, Award, CheckCircle, ChevronRight, CheckSquare, Square } from 'lucide-react'
+import {
+  Building2, Home, Briefcase, Camera, Award,
+  CheckCircle, ChevronRight, CheckSquare, Square,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import { useAdminSelection, BulkActionToolbar } from '@/components/admin'
 import { AGENT_TYPE_LABELS } from '@/lib/constants'
 
@@ -33,7 +38,7 @@ interface Props {
 }
 
 export default function AgentsTableClient({ agents }: Props) {
-  const [items, setItems] = useState<AgentRow[]>(agents)
+  const router = useRouter()
 
   const {
     selectedIds,
@@ -44,21 +49,7 @@ export default function AgentsTableClient({ agents }: Props) {
     isSelected,
     isAllSelected,
     isSomeSelected,
-  } = useAdminSelection(items)
-
-  const refresh = () => {
-    // Re-fetch is done by router.refresh in the parent; for now we just clear.
-    clearSelection()
-  }
-
-  if (!items.length) {
-    return (
-      <div className="text-center py-16 text-adm-faint">
-        <Award size={40} className="mx-auto mb-3" />
-        <p className="text-sm font-medium">No agents found</p>
-      </div>
-    )
-  }
+  } = useAdminSelection(agents)
 
   return (
     <>
@@ -66,17 +57,15 @@ export default function AgentsTableClient({ agents }: Props) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-adm-surface-2 border-b border-adm-border">
-              <th className="px-4 py-3">
+              <th className="px-4 py-3 w-10">
                 <button
                   onClick={toggleAll}
                   className="text-adm-muted hover:text-adm-text transition-colors"
                   aria-label="Select all"
                 >
-                  {isAllSelected ? (
-                    <CheckSquare size={16} className="text-adm-accent" />
-                  ) : (
-                    <Square size={16} className={isSomeSelected ? 'text-adm-accent/60' : ''} />
-                  )}
+                  {isAllSelected
+                    ? <CheckSquare size={16} className="text-adm-accent" />
+                    : <Square size={16} className={isSomeSelected ? 'text-adm-accent/60' : ''} />}
                 </button>
               </th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">Agent</th>
@@ -90,7 +79,7 @@ export default function AgentsTableClient({ agents }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-adm-border">
-            {items.map((agent) => {
+            {agents.map((agent) => {
               const profile = agent.profiles
               const Icon = agentTypeIcons[agent.agent_type] || Award
               const selected = isSelected(agent.id)
@@ -105,20 +94,16 @@ export default function AgentsTableClient({ agents }: Props) {
                       className="text-adm-muted hover:text-adm-text transition-colors"
                       aria-label={`Select ${agent.business_name || 'agent'}`}
                     >
-                      {selected ? (
-                        <CheckSquare size={16} className="text-adm-accent" />
-                      ) : (
-                        <Square size={16} />
-                      )}
+                      {selected
+                        ? <CheckSquare size={16} className="text-adm-accent" />
+                        : <Square size={16} />}
                     </button>
                   </td>
                   <td className="px-5 py-4">
-                    <div>
-                      <p className="font-semibold text-adm-text">
-                        {agent.business_name || profile?.name || '—'}
-                      </p>
-                      <p className="text-xs text-adm-faint mt-0.5">{profile?.email}</p>
-                    </div>
+                    <p className="font-semibold text-adm-text">
+                      {agent.business_name || profile?.name || '—'}
+                    </p>
+                    <p className="text-xs text-adm-faint mt-0.5">{profile?.email}</p>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5 text-adm-muted">
@@ -128,10 +113,10 @@ export default function AgentsTableClient({ agents }: Props) {
                   </td>
                   <td className="px-5 py-4">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
-                      agent.status === 'active'    ? 'bg-adm-green/10 text-adm-green' :
-                      agent.status === 'pending'   ? 'bg-adm-amber/10 text-adm-amber' :
-                      agent.status === 'suspended' ? 'bg-adm-red/10 text-adm-red' :
-                      'bg-adm-surface-2 text-adm-faint'
+                      agent.status === 'active'    ? 'bg-adm-green/10 text-adm-green border border-adm-green/20' :
+                      agent.status === 'pending'   ? 'bg-adm-amber/10 text-adm-amber border border-adm-amber/20' :
+                      agent.status === 'suspended' ? 'bg-adm-red/10 text-adm-red border border-adm-red/20' :
+                      'bg-adm-surface-2 text-adm-faint border border-adm-border'
                     }`}>
                       {agent.status}
                     </span>
@@ -180,7 +165,7 @@ export default function AgentsTableClient({ agents }: Props) {
         selectedCount={selectedCount}
         resourceType="agent"
         selectedIds={selectedIds}
-        onActionComplete={refresh}
+        onActionComplete={() => { clearSelection(); router.refresh() }}
         onClearSelection={clearSelection}
       />
     </>

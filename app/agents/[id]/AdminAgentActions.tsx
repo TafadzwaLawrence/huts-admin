@@ -14,11 +14,7 @@ interface Props {
 }
 
 export default function AdminAgentActions({
-  agentId,
-  currentStatus,
-  currentVerified,
-  currentFeatured,
-  agentSlug,
+  agentId, currentStatus, currentVerified, currentFeatured, agentSlug,
 }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
@@ -61,7 +57,7 @@ export default function AdminAgentActions({
 
   return (
     <div className="space-y-3">
-      {/* Status */}
+      {/* Status actions */}
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-[#212529]">Status</h3>
 
@@ -99,7 +95,7 @@ export default function AdminAgentActions({
         )}
       </div>
 
-      {/* Verification */}
+      {/* Verification badge */}
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-[#212529]">Verification</h3>
         <button
@@ -139,7 +135,7 @@ export default function AdminAgentActions({
         </button>
       </div>
 
-      {/* External / Danger */}
+      {/* External / danger */}
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         {agentSlug && (
           <a
@@ -163,3 +159,4 @@ export default function AdminAgentActions({
     </div>
   )
 }
+

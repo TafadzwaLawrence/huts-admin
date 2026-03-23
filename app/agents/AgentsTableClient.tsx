@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Building2, Home, Briefcase, Camera, Award, CheckCircle, ChevronRight, CheckSquare, Square } from 'lucide-react'
-import { toast } from 'sonner'
 import { useAdminSelection, BulkActionToolbar } from '@/components/admin'
 import { AGENT_TYPE_LABELS } from '@/lib/constants'
 
@@ -82,6 +81,7 @@ export default function AgentsTableClient({ agents }: Props) {
               </th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">Agent</th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">Type</th>
+              <th className="text-left px-5 py-3 font-semibold text-adm-muted">Status</th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">City</th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">Rating</th>
               <th className="text-left px-5 py-3 font-semibold text-adm-muted">Verified</th>
@@ -125,6 +125,16 @@ export default function AgentsTableClient({ agents }: Props) {
                       <Icon size={14} />
                       {AGENT_TYPE_LABELS[agent.agent_type as keyof typeof AGENT_TYPE_LABELS] || agent.agent_type}
                     </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
+                      agent.status === 'active'    ? 'bg-adm-green/10 text-adm-green' :
+                      agent.status === 'pending'   ? 'bg-adm-amber/10 text-adm-amber' :
+                      agent.status === 'suspended' ? 'bg-adm-red/10 text-adm-red' :
+                      'bg-adm-surface-2 text-adm-faint'
+                    }`}>
+                      {agent.status}
+                    </span>
                   </td>
                   <td className="px-5 py-4 text-adm-muted">{agent.office_city || '—'}</td>
                   <td className="px-5 py-4">

@@ -37,7 +37,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
 
   const { data: agent, error } = await admin
     .from('agents')
-    .select('*, agent_service_areas (city, is_primary), agent_reviews (id, rating, status)')
+    .select('*, agent_service_areas (city, is_primary)')
     .eq('id', id)
     .single()
 
@@ -52,8 +52,6 @@ export default async function AdminAgentDetailPage({ params }: Props) {
   const profile = profileData as any
   const Icon = agentTypeIcons[agent.agent_type] || Award
   const serviceAreas = (agent.agent_service_areas as any[]) || []
-  const reviews = (agent.agent_reviews as any[]) || []
-  const publishedReviews = reviews.filter((r: any) => r.status === 'published')
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -163,7 +161,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
               <div>
                 <dt className="text-[#ADB5BD] mb-0.5">Reviews</dt>
                 <dd className="font-medium text-[#212529]">
-                  {publishedReviews.length} published
+                  {agent.total_reviews || 0} reviews
                   {agent.avg_rating ? ` · ${Number(agent.avg_rating).toFixed(1)} ⭐` : ''}
                 </dd>
               </div>

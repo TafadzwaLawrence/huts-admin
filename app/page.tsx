@@ -8,6 +8,7 @@ import {
   Star,
   ArrowUpRight,
   TrendingUp,
+  Briefcase,
 } from 'lucide-react'
 import { AdminStatCard, AdminBadge } from '@/components/admin'
 
@@ -36,6 +37,8 @@ export default async function AdminOverviewPage() {
     { count: totalReviews },
     { data: recentPending },
     { data: recentUsers },
+    { count: totalAgents },
+    { count: pendingAgents },
   ] = await Promise.all([
     admin.from('properties').select('*', { count: 'exact', head: true }),
     admin.from('properties').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
@@ -51,6 +54,8 @@ export default async function AdminOverviewPage() {
       profiles!properties_user_id_fkey(name, email)
     `).eq('verification_status', 'pending').order('created_at', { ascending: false }).limit(5),
     admin.from('profiles').select('id, name, email, role, created_at').order('created_at', { ascending: false }).limit(5),
+    admin.from('agents').select('*', { count: 'exact', head: true }),
+    admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
   ])
 
   const dateString = new Date().toLocaleDateString('en-US', {
@@ -69,8 +74,39 @@ export default async function AdminOverviewPage() {
       {(pendingProperties || 0) > 0 && (
         <Link
           href="/verification"
+          className="flex items-center gap-4 bg-adm-amber/5 border border-adm-amber/20 rounded-xl p-4 mb-4 group hover:border-adm-amber/40 transition-colors"
+        >
+          <div className="w-10 h-10 bg-adm-amber/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <ShieldAlert size={20} className="text-adm-amber" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-adm-text">
+              {pendingProperties} {pendingProperties === 1 ? 'property' : 'properties'} awaiting verification
+            </p>
+            <p className="text-xs text-adm-muted">Review and approve or reject pending listings</p>
+          </div>
+          <ArrowUpRight size={16} className="text-adm-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+      )}
+
+      {/* Pending agents alert */}
+      {(pendingAgents || 0) > 0 && (
+        <Link
+          href="/agents?status=pending"
           className="flex items-center gap-4 bg-adm-amber/5 border border-adm-amber/20 rounded-xl p-4 mb-6 group hover:border-adm-amber/40 transition-colors"
         >
+          <div className="w-10 h-10 bg-adm-amber/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Briefcase size={20} className="text-adm-amber" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-adm-text">
+              {pendingAgents} {pendingAgents === 1 ? 'agent' : 'agents'} awaiting approval
+            </p>
+            <p className="text-xs text-adm-muted">Review and approve pending agent profiles</p>
+          </div>
+          <ArrowUpRight size={16} className="text-adm-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+      )}
           <div className="w-10 h-10 bg-adm-amber/10 rounded-xl flex items-center justify-center flex-shrink-0">
             <ShieldAlert size={20} className="text-adm-amber" />
           </div>
@@ -89,7 +125,7 @@ export default async function AdminOverviewPage() {
         <AdminStatCard label="Total Properties" value={totalProperties || 0} icon={Building2} href="/properties" />
         <AdminStatCard label="Pending Review" value={pendingProperties || 0} icon={ShieldAlert} href="/verification" highlight={(pendingProperties || 0) > 0} />
         <AdminStatCard label="Total Users" value={totalUsers || 0} icon={Users} href="/users" />
-        <AdminStatCard label="Reviews" value={totalReviews || 0} icon={Star} />
+        <AdminStatCard label="Total Agents" value={totalAgents || 0} icon={Briefcase} href="/agents" />
       </div>
 
       {/* Secondary stats */}

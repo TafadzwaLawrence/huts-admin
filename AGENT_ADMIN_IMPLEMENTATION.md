@@ -1,332 +1,547 @@
-# Admin: Agent Verification & Activity Management
+# Agents System — Full Implementation Guide
 
-## Current State
-
-| Surface | File | Status |
-|---|---|---|
-| Agent list (tabs) | `app/admin/agents/page.tsx` | ✅ Exists |
-| Agent detail view | `app/admin/agents/[id]/page.tsx` | ✅ Exists |
-| Agent PATCH/DELETE API | `app/api/admin/agents/[id]/route.ts` | ✅ Exists |
-| `AdminAgentActions` component | `app/admin/agents/[id]/AdminAgentActions.tsx` | ❌ Missing |
-| Bulk approve/reject | — | ❌ Missing |
-| Verification email on approve/reject | — | ❌ Missing |
-| Agent activity feed | — | ❌ Missing |
-| Agent stats in admin dashboard | `app/api/admin/stats/route.ts` | Partial |
+> Covers the complete agents feature: database, signup wizard, agent portal, public profile, admin management, and email.
+> Built for the Huts Zimbabwe property platform (Next.js 14 App Router + Supabase).
 
 ---
 
-## Database
+## 1. File Structure
 
-The admin queries the `agent_profiles` **view** (legacy name). The underlying table after migration `029` is **`agents`**.
+```
+app/
+├── agents/signup/page.tsx          ← Public signup wizard (5-step, client component)
+├── agent/
+│   ├── [slug]/page.tsx             ← Public agent profile page (server component)
+│   └── (portal)/
+│       ├── layout.tsx              ← Portal auth guard + AgentNavbar
+│       ├── overview/page.tsx       ← Agent dashboard (server component)
+│       ├── leads/                  ← Lead management
+│       ├── clients/                ← Client CRM
+│       ├── transactions/           ← Transaction tracker
+│       ├── commissions/            ← Commission tracker
+│       ├── calendar/               ← Appointments
+│       ├── messages/page.tsx       ← Re-exports dashboard messages page
+│       └── profile/page.tsx        ← Re-exports dashboard/agent-profile page ❌ (needs own page)
+├── admin/agents/
+│   ├── page.tsx                    ← Admin agent list (server component)
+│   └── [id]/
+│       ├── page.tsx                ← Admin agent detail (server component)
+│       └── AdminAgentActions.tsx   ← Action buttons (client component)
+└── api/admin/agents/[id]/route.ts  ← PATCH / DELETE API
 
-### Key columns used by admin
+components/
+├── layout/AgentNavbar.tsx          ← Portal top nav
+└── ui/PhoneInput.tsx               ← Phone input with country dial code
+
+emails/
+└── AgentVerificationEmail.tsx      ← Sent on approval / verification badge
+
+supabase/migrations/
+└── 037_agents_clean_setup.sql      ← ⚠️ MUST BE RUN FIRST in Supabase SQL Editor
+```
+
+---
+
+## 2. Database — Run Migration 037 First
+
+**File:** `supabase/migrations/037_agents_clean_setup.sql`
+**Run in:** Supabase SQL Editor (Dashboard → SQL Editor → paste and run)
+
+### What it does
+1. Adds `status TEXT NOT NULL DEFAULT 'pending'` to `agents` if missing
+2. Adds `featured BOOLEAN NOT NULL DEFAULT FALSE` to `agents` if missing
+3. Backfills existing rows: `is_active = true → status = 'active'`
+4. Adds `CHECK (status IN ('pending','active','suspended','inactive'))` constraint
+5. Fixes `agent_service_areas.agent_id` FK → `agents(id) ON DELETE CASCADE`
+6. Fixes `agent_reviews.agent_id` FK → `agents(id) ON DELETE CASCADE`
+7. Drops old `agent_profiles` TABLE or VIEW (whichever exists), recreates as `VIEW agent_profiles AS SELECT * FROM agents`
+8. Creates indexes: `agents(status)`, `agents(featured)`, `agents(slug)`
+
+### Success confirmation
+The final query returns one row:
+```
+total_agents | pending | active | status_col_exists | result
+      3      |    2    |   1    |      status       | Setup complete
+```
+
+---
+
+## 3. `agents` Table Schema
 
 ```sql
--- agents table
-user_id          UUID   -- FK to auth.users (also profiles.id)
-agent_type       TEXT   -- real_estate_agent | property_manager | home_builder | photographer | other
-business_name    TEXT
-phone            TEXT
-whatsapp         TEXT
-office_address   TEXT
-office_city      TEXT
-license_number   TEXT
-bio              TEXT
-specializations  TEXT[]
-languages        TEXT[]
-verified         BOOLEAN DEFAULT false
+id                UUID        PRIMARY KEY DEFAULT gen_random_uuid()
+user_id           UUID        REFERENCES profiles(id) ON DELETE CASCADE
+agent_type        TEXT        -- see Agent Types below
+business_name     TEXT
+bio               TEXT
+phone             TEXT        -- stored as full international: e.g. +2637XXXXXXXX
+whatsapp          TEXT
+office_address    TEXT
+office_city       TEXT
+years_experience  INTEGER
+license_number    TEXT
+website           TEXT
+languages         TEXT[]      -- e.g. ['English', 'Shona']
+specializations   TEXT[]      -- see Specializations below
+slug              TEXT UNIQUE
+profile_image_url TEXT        -- Uploadthing CDN URL
+verified          BOOLEAN     DEFAULT FALSE
 verification_date TIMESTAMPTZ
-status           TEXT    -- pending | active | suspended | inactive
-is_active        BOOLEAN DEFAULT true
-is_featured      BOOLEAN DEFAULT false
-slug             TEXT UNIQUE
-avg_rating       DECIMAL
-total_reviews    INT
-created_at       TIMESTAMPTZ
+is_active         BOOLEAN     DEFAULT TRUE  -- legacy column, use status instead
+is_premier        BOOLEAN     DEFAULT FALSE -- premium tier
+status            TEXT        NOT NULL DEFAULT 'pending'
+                              -- CHECK: pending | active | suspended | inactive
+featured          BOOLEAN     NOT NULL DEFAULT FALSE
+avg_rating        NUMERIC(3,2)
+total_reviews     INTEGER DEFAULT 0
+created_at        TIMESTAMPTZ DEFAULT NOW()
+updated_at        TIMESTAMPTZ DEFAULT NOW()
 ```
 
-### View: `agent_profiles` (compatibility alias)
-
-If `agent_profiles` view doesn't exist yet, create it:
-
+### `agent_service_areas` table
 ```sql
-CREATE OR REPLACE VIEW agent_profiles AS
-SELECT * FROM agents;
+id         UUID PRIMARY KEY DEFAULT gen_random_uuid()
+agent_id   UUID REFERENCES agents(id) ON DELETE CASCADE
+city       TEXT NOT NULL
+is_primary BOOLEAN DEFAULT FALSE
 ```
 
-Or update queries in `app/admin/agents/` to use `agents` directly.
+### Agent Types (`lib/constants.ts`)
+```typescript
+import { AGENT_TYPE_LABELS } from '@/lib/constants'
+// Keys:
+'real_estate_agent'  → 'Real Estate Agent'
+'property_manager'   → 'Property Manager'
+'home_builder'       → 'Home Builder'
+'photographer'       → 'Real Estate Photographer'
+'other'              → 'Other Professional'
+```
+
+### Specializations (`lib/constants.ts`)
+```typescript
+import { AGENT_SPECIALIZATION_LABELS } from '@/lib/constants'
+// Keys: luxury_homes, first_time_buyers, commercial, investment,
+//       student_housing, rental_management, affordable_housing,
+//       new_construction, foreclosures, land_sales, vacation_rentals, senior_living
+```
 
 ---
 
-## Step 1 — Create `AdminAgentActions.tsx`
+## 4. Signup Wizard — `app/agents/signup/page.tsx`
 
-**File:** `app/admin/agents/[id]/AdminAgentActions.tsx`
+**Type:** `'use client'` — single file, wraps inner component in `<Suspense>` (required for `useSearchParams`).
 
-This is the right-column action panel on the agent detail page.
+### Step flow
+```
+Step 0  — Account creation (email/password or Google OAuth)
+          Only shown when user is NOT authenticated.
+          On auth complete → onAuthStateChange fires → advances to Step 1.
 
-```tsx
-'use client'
+Step 1  — Agent type selection (5 cards: real_estate_agent, property_manager,
+          home_builder, photographer, other)
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { CheckCircle, ShieldX, ShieldCheck, Star, Trash2, ExternalLink, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+Step 2  — Basic info: business_name, phone (PhoneInput), whatsapp (PhoneInput),
+          office_address (LocationPicker map), office_city (required)
 
-interface Props {
-  agentId: string
-  currentStatus: string
+Step 3  — Professional details: license_number, years_experience, certifications
+
+Step 4  — Service areas: multi-select cities from ZIMBABWE_CITIES constant (min 1 required)
+
+Step 5  — Profile content: bio (required), specializations (multi-select), languages
+```
+
+### `handleSubmit` — what it inserts
+```typescript
+// 1. Update profiles table
+await supabase.from('profiles').update({
+  role: 'agent',
+  phone: `${formData.phone_dial}${formData.phone}`,
+  city: formData.office_city,
+  bio: formData.bio,
+}).eq('id', user.id)
+
+// 2. Insert into agents table
+const { data: agentProfile } = await supabase.from('agents').insert({
+  user_id: user.id,
+  agent_type: formData.agent_type,
+  business_name: formData.business_name || null,
+  phone: `${formData.phone_dial}${formData.phone}`,
+  whatsapp: `${formData.whatsapp_dial}${formData.whatsapp}`,
+  office_address: formData.office_address || null,
+  office_city: formData.office_city,
+  license_number: formData.license_number || null,
+  bio: formData.bio,
+  specializations: formData.specializations,
+  // status defaults to 'pending' — admin must approve
+}).select().single()
+
+// 3. Insert service areas
+await supabase.from('agent_service_areas').insert(
+  formData.service_areas.map(city => ({ agent_id: agentProfile.id, city }))
+)
+
+// 4. Redirect
+router.push('/dashboard/overview')
+```
+
+### ⚠️ Known gap: role upgrade not persisted
+The `profiles.update({ role: 'agent' })` call runs client-side with the anon key. If RLS blocks it, `profiles.role` may stay as `'renter'` and the agent portal layout will redirect back to `/agents/signup`.
+
+**Fix:** Call a Postgres function instead:
+```typescript
+await supabase.rpc('fn_upgrade_to_agent', { p_user_id: user.id })
+```
+Or ensure RLS on `profiles` allows users to update their own `role` column.
+
+### After submit
+Agent record has `status = 'pending'`. Admin must approve it (`status → 'active'`) before:
+- The agent portal becomes accessible (layout checks for `agents` row but doesn't check `status`)
+- The public profile is visible (`/agent/[slug]` only shows `status = 'active'`)
+
+---
+
+## 5. Agent Portal — `app/agent/(portal)/`
+
+### Layout — `app/agent/(portal)/layout.tsx`
+
+**Type:** Server Component.
+
+Auth logic:
+1. `createClient()` → `getUser()` — redirect to `/auth/signup` if no session
+2. Query `profiles` for `full_name, role, avatar_url`
+3. Query `agents` for `id, is_premier` where `user_id = user.id`
+4. If no `agents` row found → redirect to `/agents/signup`
+
+Renders `AgentNavbar` with `user`, `profile`, `agentId`, `isPremier` props.
+
+### AgentNavbar — `components/layout/AgentNavbar.tsx`
+
+**Type:** `'use client'`
+
+Nav links (in order):
+```
+/agent/overview      Overview        LayoutDashboard
+/agent/leads         Leads           Inbox  (+ count badge from `leads` table)
+/agent/transactions  Transactions    FileText
+/agent/clients       Clients         Users
+/agent/messages      Messages        MessageSquare
+/agent/calendar      Calendar        Calendar
+/agent/profile       My Profile      User
+```
+
+New lead count badge: queries `leads` table where `assigned_to = agentId` and `status IN ('assigned','new')`. Updates in real-time via Supabase channel subscription.
+
+### Portal Pages
+
+| Route | File | Status |
+|-------|------|--------|
+| `/agent/overview` | `app/agent/(portal)/overview/page.tsx` | ✅ Server component, shows stat cards + recent leads |
+| `/agent/leads` | `app/agent/(portal)/leads/` | ✅ Exists |
+| `/agent/transactions` | `app/agent/(portal)/transactions/` | ✅ Exists |
+| `/agent/clients` | `app/agent/(portal)/clients/` | ✅ Exists |
+| `/agent/commissions` | `app/agent/(portal)/commissions/` | ✅ Exists |
+| `/agent/calendar` | `app/agent/(portal)/calendar/` | ✅ Exists |
+| `/agent/messages` | `app/agent/(portal)/messages/page.tsx` | ✅ Re-exports dashboard messages page |
+| `/agent/profile` | `app/agent/(portal)/profile/page.tsx` | ❌ Re-exports landlord profile page — needs own form |
+
+---
+
+## 6. Public Agent Profile — `app/agent/[slug]/page.tsx`
+
+**Type:** Server Component.
+
+### Access control
+Only renders `status = 'active'` agents. Any other status → `notFound()`.
+
+### Slug resolution
+```typescript
+// 1. Try slug
+SELECT * FROM agents WHERE slug = $1 AND status = 'active'
+
+// 2. Fall back to user_id (legacy links before slugs existed)
+SELECT * FROM agents WHERE user_id = $1 AND status = 'active'
+```
+
+### Data fetched
+```typescript
+supabase.from('agents').select(`
+  *,
+  profiles:user_id (full_name, email, avatar_url),
+  agent_service_areas (city, is_primary)
+`)
+```
+
+### Contact CTA priority
+1. WhatsApp (`https://wa.me/[whatsapp]`) if `agent.whatsapp` is set
+2. Phone call (`tel:[phone]`) if `agent.phone` is set
+3. Email (`mailto:[profile.email]`) as fallback
+
+### SEO (`generateMetadata`)
+```typescript
+{
+  title: `${name} — ${typeLabel} in Zimbabwe | Huts`,
+  description: agent.bio?.slice(0, 155) || `Connect with ${name}, a verified ${typeLabel} on Huts Zimbabwe.`
+}
+```
+
+---
+
+## 7. Admin Agent Management
+
+### Supabase client rule — CRITICAL
+```typescript
+// Auth check only:
+const supabase = await createClient()                    // reads cookie session
+const { data: { user } } = await supabase.auth.getUser()
+
+// ALL database reads and writes in admin:
+const admin = createAdminClient()                        // service role, bypasses RLS
+// Note: createAdminClient() is synchronous — no await
+```
+Using `createClient()` for DB queries in admin will hide `pending`/`suspended` agents due to RLS.
+
+---
+
+### Admin Agent List — `app/admin/agents/page.tsx`
+
+**Type:** Server Component. Receives `searchParams: { status?: string }`.
+
+**Default tab:** `pending`
+
+**Tabs with count badges:** `pending | active | suspended | inactive`
+
+**Query:**
+```typescript
+const supabase = createAdminClient()
+const { data: agents } = await supabase
+  .from('agents')
+  .select(`
+    id, user_id, agent_type, business_name, office_city,
+    phone, verified, status, featured, avg_rating, total_reviews,
+    created_at, slug,
+    profiles:user_id (full_name, email, avatar_url)
+  `)
+  .eq('status', statusFilter)
+  .order('created_at', { ascending: false })
+```
+
+**Table columns:** Agent name+email, Type (with icon), City, Rating, Verified, Submitted date, "Review →" button
+
+**Status badge styles:**
+```typescript
+pending:   'bg-amber-50 text-amber-700 border border-amber-200'
+active:    'bg-green-50 text-green-700 border border-green-200'
+suspended: 'bg-red-50 text-red-700 border border-red-200'
+inactive:  'bg-gray-100 text-gray-600 border border-gray-200'
+```
+
+---
+
+### Admin Agent Detail — `app/admin/agents/[id]/page.tsx`
+
+**Type:** Server Component.
+
+**Query:**
+```typescript
+const { data: agent } = await supabase
+  .from('agents')
+  .select(`
+    *,
+    profiles:user_id (full_name, email, avatar_url, created_at),
+    agent_service_areas (city, is_primary)
+  `)
+  .eq('id', params.id)
+  .single()
+```
+
+**⚠️ Do NOT join `agent_reviews`** — the FK may be dangling before migration 037 is run. Use the denormalized `agent.avg_rating` and `agent.total_reviews` columns instead.
+
+**Layout:** 2-column grid:
+- Left (2/3): profile card (avatar initial, name, type, email, status+verified+featured badges), bio, professional details grid (experience, license, phone, city, member since, reviews), service areas (primary in black pill, others in gray), specializations, languages
+- Right (1/3): `AdminAgentActions` component
+
+---
+
+### AdminAgentActions — `app/admin/agents/[id]/AdminAgentActions.tsx`
+
+**Type:** `'use client'`
+
+**Props:**
+```typescript
+{
+  agentId:         string
+  currentStatus:   'pending' | 'active' | 'suspended' | 'inactive'
   currentVerified: boolean
   currentFeatured: boolean
-  agentSlug: string | null
+  agentSlug:       string | null
 }
+```
 
-export default function AdminAgentActions({
-  agentId, currentStatus, currentVerified, currentFeatured, agentSlug,
-}: Props) {
-  const router = useRouter()
-  const [loading, setLoading] = useState<string | null>(null)
+**Buttons and what they send to `PATCH /api/admin/agents/[agentId]`:**
 
-  const patch = async (body: object, successMsg: string) => {
-    const action = JSON.stringify(body)
-    setLoading(action)
-    try {
-      const res = await fetch(`/api/admin/agents/${agentId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) throw new Error((await res.json()).error || 'Failed')
-      toast.success(successMsg)
-      router.refresh()
-    } catch (err: any) {
-      toast.error(err.message)
-    } finally {
-      setLoading(null)
-    }
-  }
+| Button | Payload | Visible when |
+|--------|---------|--------------|
+| Approve Agent | `{ status: 'active' }` | status !== 'active' |
+| Suspend Agent | `{ status: 'suspended' }` | status !== 'suspended' |
+| Reactivate Agent | `{ status: 'active' }` | status === 'suspended' |
+| Mark as Verified | `{ verified: true }` | !currentVerified |
+| Remove Verification | `{ verified: false }` | currentVerified |
+| Mark as Featured | `{ featured: true }` | !currentFeatured |
+| Remove Featured | `{ featured: false }` | currentFeatured |
+| View Public Profile | link → `/agent/[slug]` | agentSlug != null |
+| Delete Agent | `DELETE /api/admin/agents/[agentId]` | always |
 
-  const handleDelete = async () => {
-    if (!confirm('Permanently delete this agent profile? This cannot be undone.')) return
-    setLoading('delete')
-    try {
-      const res = await fetch(`/api/admin/agents/${agentId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error((await res.json()).error || 'Failed')
-      toast.success('Agent deleted')
-      router.push('/admin/agents')
-    } catch (err: any) {
-      toast.error(err.message)
-    } finally {
-      setLoading(null)
-    }
-  }
+After each action: `toast.success()` + `router.refresh()` (re-renders the server component).
 
-  const isLoading = (key: string) => loading === key
+---
 
-  return (
-    <div className="space-y-3">
-      {/* Status actions */}
-      <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-[#212529]">Status</h3>
+### Admin PATCH/DELETE API — `app/api/admin/agents/[id]/route.ts`
 
-        {currentStatus !== 'active' && (
-          <button
-            onClick={() => patch({ status: 'active' }, 'Agent approved')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#212529] text-white text-sm font-semibold rounded-xl hover:bg-black disabled:opacity-50 transition-colors"
-          >
-            {isLoading('{"status":"active"}') ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-            Approve
-          </button>
-        )}
+**PATCH — allowed body fields (whitelist enforced):**
+```typescript
+{ status: 'pending' | 'active' | 'suspended' | 'inactive' }
+{ verified: boolean }       // also sets verification_date when true
+{ featured: boolean }
+```
 
-        {currentStatus !== 'suspended' && (
-          <button
-            onClick={() => patch({ status: 'suspended' }, 'Agent suspended')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#212529] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
-          >
-            {isLoading('{"status":"suspended"}') ? <Loader2 size={14} className="animate-spin" /> : <ShieldX size={14} />}
-            Suspend
-          </button>
-        )}
+**On `status → 'active'` OR `verified → true`:** Sends `AgentVerificationEmail` via Resend. Non-fatal — email errors are logged but don't fail the update.
 
-        {currentStatus !== 'inactive' && (
-          <button
-            onClick={() => patch({ status: 'inactive' }, 'Agent deactivated')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#495057] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
-          >
-            Deactivate
-          </button>
-        )}
-      </div>
+**DELETE:** Hard deletes the `agents` row. Cascade handles `agent_service_areas`.
 
-      {/* Verification badge */}
-      <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-[#212529]">Verification</h3>
-        <button
-          onClick={() => patch(
-            { verified: !currentVerified },
-            currentVerified ? 'Verification removed' : 'Agent verified ✓',
-          )}
-          disabled={!!loading}
-          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 ${
-            currentVerified
-              ? 'border-2 border-red-200 text-red-600 hover:border-red-400'
-              : 'bg-green-50 border-2 border-green-200 text-green-700 hover:border-green-400'
-          }`}
-        >
-          <ShieldCheck size={14} />
-          {currentVerified ? 'Remove badge' : 'Grant verified badge'}
-        </button>
-      </div>
+**Auth pattern in every route:**
+```typescript
+// 1. session check
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
 
-      {/* Featured */}
-      <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-[#212529]">Featured</h3>
-        <button
-          onClick={() => patch(
-            { featured: !currentFeatured },
-            currentFeatured ? 'Removed from featured' : 'Agent featured',
-          )}
-          disabled={!!loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#212529] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
-        >
-          <Star size={14} className={currentFeatured ? 'fill-[#212529]' : ''} />
-          {currentFeatured ? 'Unfeature' : 'Feature agent'}
-        </button>
-      </div>
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'chitangalawrence03@gmail.com').split(',').map(e => e.trim())
+if (!ADMIN_EMAILS.includes(user.email || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-      {/* External / danger */}
-      <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
-        {agentSlug && (
-          <a
-            href={`/agent/${agentSlug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#495057] text-sm font-semibold rounded-xl hover:border-[#212529] hover:text-[#212529] transition-colors"
-          >
-            <ExternalLink size={14} /> View public profile
-          </a>
-        )}
-        <button
-          onClick={handleDelete}
-          disabled={!!loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-red-100 text-red-600 text-sm font-semibold rounded-xl hover:border-red-300 disabled:opacity-50 transition-colors"
-        >
-          {isLoading('delete') ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-          Delete agent
-        </button>
-      </div>
-    </div>
-  )
-}
+// 2. db write — service role
+const adminDb = createAdminClient()
+await adminDb.from('agents').update({ ...fields }).eq('id', params.id)
 ```
 
 ---
 
-## Step 2 — Fix `agent_profiles` vs `agents` query mismatch
+## 8. Verification Email — `emails/AgentVerificationEmail.tsx`
 
-The admin list and detail pages query `agent_profiles`. After migration `029`, the table is `agents`. Either:
+Sent by `app/api/admin/agents/[id]/route.ts` on PATCH.
 
-**Option A** — Create the view in Supabase SQL Editor:
+**Props:**
+```typescript
+{
+  agentName:  string               // business_name || full_name
+  agentType:  string               // human label, e.g. 'Real Estate Agent'
+  profileUrl: string               // https://huts.co.zw/agent/[slug]
+  portalUrl:  string               // https://huts.co.zw/agent/overview
+  action:     'approved' | 'verified'
+}
+```
+
+**Subject lines:**
+- `approved` → `"Your Huts agent profile is now live, ${agentName}!"`
+- `verified` → `"You've been verified on Huts, ${agentName}!"`
+
+---
+
+## 9. Pending Work ❌
+
+### 9.1 Role upgrade fix (BLOCKER for portal access)
+The `handleSubmit` in `app/agents/signup/page.tsx` calls:
+```typescript
+await supabase.from('profiles').update({ role: 'agent' }).eq('id', user.id)
+```
+If RLS blocks this (user can't update their own role), the portal layout redirects back to signup.
+
+**Fix:** Replace with an RPC call that runs as `SECURITY DEFINER`:
+```typescript
+await supabase.rpc('fn_upgrade_to_agent', { p_user_id: user.id })
+```
+Migration needed:
 ```sql
-CREATE OR REPLACE VIEW agent_profiles AS SELECT * FROM agents;
-GRANT SELECT ON agent_profiles TO authenticated, anon;
+CREATE OR REPLACE FUNCTION fn_upgrade_to_agent(p_user_id UUID)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE profiles SET role = 'agent' WHERE id = p_user_id;
+END;
+$$;
 ```
 
-**Option B** — Update the queries in the admin pages to use `agents` directly (search & replace `agent_profiles` → `agents` in `app/admin/agents/`).
+### 9.2 Agent edit profile page
+`app/agent/(portal)/profile/page.tsx` is `export { default } from '@/app/dashboard/agent-profile/page'` — it points to the wrong page.
 
----
+Needs a dedicated form with fields:
+- `business_name`, `bio`, `phone`, `office_city`
+- `years_experience`, `license_number`, `website`
+- `languages[]`, `specializations[]`
+- Profile photo upload (Uploadthing → store URL in `agents.profile_image_url`)
 
-## Step 3 — Verification Email on Approve/Reject
-
-**File:** `emails/AgentVerificationEmail.tsx` (create using existing email templates as reference)
-**Send from:** `app/api/admin/agents/[id]/route.ts` after status change
-
-```ts
-// In PATCH handler, after successful update:
-if (allowed.status === 'active') {
-  // fetch agent email from profiles
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('email, full_name')
-    .eq('id', agentRow.user_id)
-    .single()
-
-  if (profile?.email) {
-    await resend.emails.send({
-      from: 'Huts <noreply@huts.co.zw>',
-      to: profile.email,
-      subject: 'Your agent profile is approved 🎉',
-      react: AgentApprovedEmail({ name: profile.full_name || 'there' }),
-    })
-  }
-}
+API route needed: `PATCH /api/agent/profile`
+```typescript
+// Auth: createClient() → getUser()
+// DB write: update agents SET ... WHERE user_id = user.id
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+await supabase.from('agents').update({ ...fields }).eq('user_id', user.id)
 ```
 
----
+### 9.3 Service areas not set as primary
+The signup inserts service areas but never sets `is_primary = true`. The public profile shows a "primary" badge — it will never appear for newly signed-up agents.
 
-## Step 4 — Bulk Actions on Agent List
+**Fix:** In `handleSubmit`, mark `formData.primary_service_area` as primary:
+```typescript
+formData.service_areas.map(city => ({
+  agent_id: agentProfile.id,
+  city,
+  is_primary: city === formData.primary_service_area,
+}))
+```
 
-The agent list page currently has no bulk select. Add using the existing `useAdminSelection` + `AdminBulkActions` pattern (already used in `app/admin/verification/page.tsx`).
+### 9.4 Admin overview — agent stats missing
+`app/admin/page.tsx` does not show agent pending count. Add to the `Promise.all`:
+```typescript
+admin.from('agents').select('*', { count: 'exact', head: true }),
+admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+```
+And add an alert banner (same pattern as the pending properties banner) linking to `/admin/agents?status=pending`.
 
-Convert `app/admin/agents/page.tsx` from Server Component to `'use client'` or extract the table into a client sub-component.
+### 9.5 `/find-agent` public page
+Page to browse active agents by city, type, and specialization. Does not exist yet.
 
-**Bulk actions to support:**
-- Approve all selected (set `status = 'active'`)
-- Suspend all selected
-- Delete all selected
-
-**API endpoint:** `app/api/admin/bulk-actions/route.ts` already exists — add `agents` as a supported resource type.
-
----
-
-## Step 5 — Agent Activity Feed (optional, future)
-
-Query to power an activity tab on the agent detail page:
-
-```sql
--- Agent's listings
-SELECT id, title, status, created_at, 'property' AS type
-FROM properties WHERE user_id = :agent_user_id
-
-UNION ALL
-
--- Agent's received reviews  
-SELECT r.id, r.comment_text AS title, r.status, r.created_at, 'review' AS type
-FROM reviews r
-JOIN properties p ON r.property_id = p.id
-WHERE p.user_id = :agent_user_id
-
-ORDER BY created_at DESC
-LIMIT 20;
+Query (public page — use `createClient()` not admin client, RLS shows only `status='active'`):
+```typescript
+supabase.from('agents')
+  .select(`*, profiles:user_id (full_name, avatar_url), agent_service_areas (city, is_primary)`)
+  .eq('status', 'active')
+  .order('featured', { ascending: false })
+  .order('avg_rating', { ascending: false, nullsFirst: false })
 ```
 
 ---
 
-## Step 6 — Admin Stats: Pending Agents Count
+## 10. Key Constants Reference
 
-Add to `app/api/admin/stats/route.ts`:
-
-```ts
-const { count: pendingAgents } = await supabase
-  .from('agents')
-  .select('id', { count: 'exact', head: true })
-  .eq('status', 'pending')
+All from `lib/constants.ts`, import as:
+```typescript
+import {
+  AGENT_TYPE_LABELS,
+  AGENT_SPECIALIZATIONS,
+  AGENT_SPECIALIZATION_LABELS,
+  ZIMBABWE_CITIES,
+  LANGUAGES,
+  ICON_SIZES,
+} from '@/lib/constants'
 ```
 
-Surface in the admin overview dashboard as a "Needs review" badge next to the Agents nav link.
-
----
-
-## Priority Order
-
-| # | Task | Effort | Impact |
-|---|---|---|---|
-| 1 | Create `AdminAgentActions.tsx` | 1h | Unblocks all approve/reject flows |
-| 2 | Fix `agent_profiles` view or update queries | 15min | Unblocks list + detail loading |
-| 3 | Verification email on approve | 30min | Agent experience |
-| 4 | Bulk actions on agent list | 1h | Admin efficiency |
-| 5 | Pending count in dashboard nav | 15min | Admin awareness |
-| 6 | Activity feed tab | 2h | Nice to have |
+**Colors (Tailwind hex values):**
+```
+#212529  charcoal    ← primary text, black buttons, status active bg on agent
+#495057  dark-gray   ← secondary text
+#ADB5BD  medium-gray ← muted/placeholder text
+#E9ECEF  light-gray  ← borders
+#F8F9FA  off-white   ← card backgrounds, table row hover
+#51CF66  green       ← verified/active state
+#FF6B6B  red         ← suspended/destructive
+```

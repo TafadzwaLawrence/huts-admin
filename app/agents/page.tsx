@@ -22,16 +22,15 @@ export default async function AdminAgentsPage({
   await requireAdmin()
   const admin = createAdminClient()
 
-  // No status filter → show all agents so nothing is ever hidden
-  const statusFilter = (status && TABS.some(t => t.key === status)) ? status : null
+  // Default to 'pending' if no valid status is provided
+  const statusFilter = (status && TABS.some(t => t.key === status)) ? status : 'pending'
 
   // All queries run in parallel
   const agentsQueryBuilder = admin
     .from('agents')
     .select('id, user_id, agent_type, business_name, office_city, verified, status, featured, avg_rating, total_reviews, created_at, slug')
+    .eq('status', statusFilter)
     .order('created_at', { ascending: false })
-
-  if (statusFilter) agentsQueryBuilder.eq('status', statusFilter)
 
   const [
     { data: agentRows, error },
@@ -62,8 +61,6 @@ export default async function AdminAgentsPage({
   const profileMap = Object.fromEntries((profileRows || []).map((p: any) => [p.id, p]))
   const agents = (agentRows || []).map((a: any) => ({ ...a, profiles: profileMap[a.user_id] ?? null }))
 
-  const totalCount = Object.values(statusCounts).reduce((a, b) => a + b, 0)
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
@@ -75,21 +72,6 @@ export default async function AdminAgentsPage({
 
       {/* Status Tabs */}
       <div className="flex gap-1 mb-6 border-b border-adm-border">
-        {/* All tab */}
-        <Link
-          href="/agents"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all ${
-            !statusFilter
-              ? 'border-adm-accent text-adm-text'
-              : 'border-transparent text-adm-muted hover:text-adm-text'
-          }`}
-        >
-          All
-          <span className="ml-2 px-1.5 py-0.5 bg-adm-surface-2 text-adm-muted rounded text-[10px] font-bold">
-            {totalCount}
-          </span>
-        </Link>
-
         {TABS.map(tab => (
           <Link
             key={tab.key}
@@ -124,13 +106,8 @@ export default async function AdminAgentsPage({
         <div className="text-center py-16 text-adm-faint">
           <Users size={40} className="mx-auto mb-3" />
           <p className="text-sm font-medium">
-            No {statusFilter ?? ''} agents found
+            No {statusFilter} agents found
           </p>
-          {statusFilter && (
-            <Link href="/agents" className="mt-2 inline-block text-xs text-adm-accent hover:underline">
-              View all agents
-            </Link>
-          )}
         </div>
       ) : (
         <AgentsTableClient agents={agents} />

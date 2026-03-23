@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, ShieldX, ShieldCheck, Star, Trash2, ExternalLink, Loader2 } from 'lucide-react'
+import {
+  CheckCircle, RefreshCw, ShieldX, ShieldCheck, Star, Trash2, ExternalLink, Loader2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Props {
   agentId: string
-  currentStatus: string
+  currentStatus: 'pending' | 'active' | 'suspended' | 'inactive'
   currentVerified: boolean
   currentFeatured: boolean
   agentSlug: string | null
@@ -17,11 +19,10 @@ export default function AdminAgentActions({
   agentId, currentStatus, currentVerified, currentFeatured, agentSlug,
 }: Props) {
   const router = useRouter()
-  const [loading, setLoading] = useState<string | null>(null)
+  const [loadingAction, setLoadingAction] = useState<string | null>(null)
 
-  const patch = async (body: object, successMsg: string) => {
-    const key = JSON.stringify(body)
-    setLoading(key)
+  const patch = async (action: string, body: object, successMsg: string) => {
+    setLoadingAction(action)
     try {
       const res = await fetch(`/api/agents/${agentId}`, {
         method: 'PATCH',
@@ -34,13 +35,13 @@ export default function AdminAgentActions({
     } catch (err: any) {
       toast.error(err.message)
     } finally {
-      setLoading(null)
+      setLoadingAction(null)
     }
   }
 
   const handleDelete = async () => {
     if (!confirm('Permanently delete this agent profile? This cannot be undone.')) return
-    setLoading('delete')
+    setLoadingAction('delete')
     try {
       const res = await fetch(`/api/agents/${agentId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error((await res.json()).error || 'Failed')
@@ -49,11 +50,12 @@ export default function AdminAgentActions({
     } catch (err: any) {
       toast.error(err.message)
     } finally {
-      setLoading(null)
+      setLoadingAction(null)
     }
   }
 
-  const isLoading = (key: string) => loading === key
+  const busy = !!loadingAction
+  const isLoading = (action: string) => loadingAction === action
 
   return (
     <div className="space-y-3">
@@ -61,36 +63,39 @@ export default function AdminAgentActions({
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-[#212529]">Status</h3>
 
-        {currentStatus !== 'active' && (
+        {/* Approve: shown for pending and inactive (not suspended — use Reactivate) */}
+        {(currentStatus === 'pending' || currentStatus === 'inactive') && (
           <button
-            onClick={() => patch({ status: 'active' }, 'Agent approved')}
-            disabled={!!loading}
+            onClick={() => patch('approve', { status: 'active' }, 'Agent approved')}
+            disabled={busy}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#212529] text-white text-sm font-semibold rounded-xl hover:bg-black disabled:opacity-50 transition-colors"
           >
-            {isLoading('{"status":"active"}') ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-            Approve
+            {isLoading('approve') ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+            Approve Agent
           </button>
         )}
 
+        {/* Reactivate: only for suspended agents */}
+        {currentStatus === 'suspended' && (
+          <button
+            onClick={() => patch('reactivate', { status: 'active' }, 'Agent reactivated')}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#212529] text-white text-sm font-semibold rounded-xl hover:bg-black disabled:opacity-50 transition-colors"
+          >
+            {isLoading('reactivate') ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+            Reactivate Agent
+          </button>
+        )}
+
+        {/* Suspend: hidden when already suspended */}
         {currentStatus !== 'suspended' && (
           <button
-            onClick={() => patch({ status: 'suspended' }, 'Agent suspended')}
-            disabled={!!loading}
+            onClick={() => patch('suspend', { status: 'suspended' }, 'Agent suspended')}
+            disabled={busy}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#212529] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
           >
-            {isLoading('{"status":"suspended"}') ? <Loader2 size={14} className="animate-spin" /> : <ShieldX size={14} />}
-            Suspend
-          </button>
-        )}
-
-        {currentStatus !== 'inactive' && (
-          <button
-            onClick={() => patch({ status: 'inactive' }, 'Agent deactivated')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#495057] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
-          >
-            {isLoading('{"status":"inactive"}') ? <Loader2 size={14} className="animate-spin" /> : null}
-            Deactivate
+            {isLoading('suspend') ? <Loader2 size={14} className="animate-spin" /> : <ShieldX size={14} />}
+            Suspend Agent
           </button>
         )}
       </div>
@@ -98,41 +103,49 @@ export default function AdminAgentActions({
       {/* Verification badge */}
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-[#212529]">Verification</h3>
-        <button
-          onClick={() => patch(
-            { verified: !currentVerified },
-            currentVerified ? 'Verification removed' : 'Agent verified ✓',
-          )}
-          disabled={!!loading}
-          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 ${
-            currentVerified
-              ? 'border-2 border-red-200 text-red-600 hover:border-red-400'
-              : 'bg-green-50 border-2 border-green-200 text-green-700 hover:border-green-400'
-          }`}
-        >
-          {isLoading(JSON.stringify({ verified: !currentVerified }))
-            ? <Loader2 size={14} className="animate-spin" />
-            : <ShieldCheck size={14} />}
-          {currentVerified ? 'Remove badge' : 'Grant verified badge'}
-        </button>
+        {!currentVerified ? (
+          <button
+            onClick={() => patch('verify', { verified: true }, 'Agent verified ✓')}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 border-2 border-green-200 text-green-700 text-sm font-semibold rounded-xl hover:border-green-400 disabled:opacity-50 transition-colors"
+          >
+            {isLoading('verify') ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
+            Mark as Verified
+          </button>
+        ) : (
+          <button
+            onClick={() => patch('unverify', { verified: false }, 'Verification removed')}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-red-200 text-red-600 text-sm font-semibold rounded-xl hover:border-red-400 disabled:opacity-50 transition-colors"
+          >
+            {isLoading('unverify') ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
+            Remove Verification
+          </button>
+        )}
       </div>
 
       {/* Featured */}
       <div className="bg-white border border-[#E9ECEF] rounded-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-[#212529]">Featured</h3>
-        <button
-          onClick={() => patch(
-            { featured: !currentFeatured },
-            currentFeatured ? 'Removed from featured' : 'Agent featured',
-          )}
-          disabled={!!loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#212529] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
-        >
-          {isLoading(JSON.stringify({ featured: !currentFeatured }))
-            ? <Loader2 size={14} className="animate-spin" />
-            : <Star size={14} className={currentFeatured ? 'fill-[#212529]' : ''} />}
-          {currentFeatured ? 'Unfeature' : 'Feature agent'}
-        </button>
+        {!currentFeatured ? (
+          <button
+            onClick={() => patch('feature', { featured: true }, 'Agent featured')}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#212529] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
+          >
+            {isLoading('feature') ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />}
+            Mark as Featured
+          </button>
+        ) : (
+          <button
+            onClick={() => patch('unfeature', { featured: false }, 'Removed from featured')}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#495057] text-sm font-semibold rounded-xl hover:border-[#212529] disabled:opacity-50 transition-colors"
+          >
+            {isLoading('unfeature') ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} className="fill-[#212529]" />}
+            Remove Featured
+          </button>
+        )}
       </div>
 
       {/* External / danger */}
@@ -144,7 +157,7 @@ export default function AdminAgentActions({
             rel="noopener noreferrer"
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#E9ECEF] text-[#495057] text-sm font-semibold rounded-xl hover:border-[#212529] hover:text-[#212529] transition-colors"
           >
-            <ExternalLink size={14} /> View public profile
+            <ExternalLink size={14} /> View Public Profile
           </a>
         )}
         <button

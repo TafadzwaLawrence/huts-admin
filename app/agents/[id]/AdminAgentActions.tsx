@@ -162,7 +162,7 @@ export default function AdminAgentActions({
         )}
         <button
           onClick={handleDelete}
-          disabled={!!loading}
+          disabled={busy}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-red-100 text-red-600 text-sm font-semibold rounded-xl hover:border-red-300 disabled:opacity-50 transition-colors"
         >
           {isLoading('delete') ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}

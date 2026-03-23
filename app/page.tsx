@@ -107,18 +107,6 @@ export default async function AdminOverviewPage() {
           <ArrowUpRight size={16} className="text-adm-muted opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
       )}
-          <div className="w-10 h-10 bg-adm-amber/10 rounded-xl flex items-center justify-center flex-shrink-0">
-            <ShieldAlert size={20} className="text-adm-amber" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-adm-text">
-              {pendingProperties} {pendingProperties === 1 ? 'property' : 'properties'} awaiting verification
-            </p>
-            <p className="text-xs text-adm-muted">Review and approve or reject pending listings</p>
-          </div>
-          <ArrowUpRight size={16} className="text-adm-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-        </Link>
-      )}
 
       {/* Primary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
-    if (!['property', 'user'].includes(resourceType)) {
+    if (!['property', 'user', 'agent'].includes(resourceType)) {
       return NextResponse.json({ error: 'Invalid resourceType' }, { status: 400 })
     }
 
@@ -152,6 +152,38 @@ export async function POST(request: NextRequest) {
             failures: failureCount,
           },
         })
+      }
+    }
+
+    } else if (resourceType === 'agent') {
+      for (const agentId of resourceIds) {
+        try {
+          if (action === 'approve') {
+            const { error } = await admin
+              .from('agents')
+              .update({ status: 'active' })
+              .eq('id', agentId)
+            if (error) throw error
+            successCount++
+          } else if (action === 'suspend') {
+            const { error } = await admin
+              .from('agents')
+              .update({ status: 'suspended' })
+              .eq('id', agentId)
+            if (error) throw error
+            successCount++
+          } else if (action === 'delete') {
+            const { error } = await admin
+              .from('agents')
+              .delete()
+              .eq('id', agentId)
+            if (error) throw error
+            successCount++
+          }
+        } catch (error) {
+          failureCount++
+          errors.push(`Agent ${agentId}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        }
       }
     }
 

@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 
 interface BulkActionToolbarProps {
   selectedCount: number
-  resourceType: 'property' | 'user'
+  resourceType: 'property' | 'user' | 'agent'
   selectedIds: string[]
   onActionComplete: () => void
   onClearSelection: () => void
@@ -29,7 +29,7 @@ export function BulkActionToolbar({
     setLoading(true)
 
     try {
-      const response = await fetch('/api/admin/bulk-actions', {
+      const response = await fetch('/api/bulk-actions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +47,8 @@ export function BulkActionToolbar({
       const result = await response.json()
       
       if (result.successCount > 0) {
-        toast.success(`${actionLabel} ${result.successCount} ${resourceType === 'property' ? 'properties' : 'users'}`)
+        const label = resourceType === 'property' ? 'properties' : resourceType === 'user' ? 'users' : 'agents'
+        toast.success(`${actionLabel} ${result.successCount} ${label}`)
       }
 
       if (result.failureCount > 0) {
@@ -74,13 +75,34 @@ export function BulkActionToolbar({
             {selectedCount}
           </div>
           <span className="font-medium">
-            {selectedCount} {resourceType === 'property' ? 'properties' : 'users'} selected
+            {selectedCount} {resourceType === 'property' ? 'properties' : resourceType === 'user' ? 'users' : 'agents'} selected
           </span>
         </div>
 
         <div className="h-6 w-px bg-white/20" />
 
         <div className="flex items-center gap-2">
+          {resourceType === 'agent' && (
+            <>
+              <button
+                onClick={() => handleBulkAction('approve', 'approve')}
+                disabled={loading}
+                className="px-3 py-1.5 bg-adm-green/15 text-adm-green hover:bg-adm-green/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <CheckSquare size={14} />
+                Approve
+              </button>
+              <button
+                onClick={() => handleBulkAction('suspend', 'suspend')}
+                disabled={loading}
+                className="px-3 py-1.5 bg-adm-amber/15 text-adm-amber hover:bg-adm-amber/25 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <UserX size={14} />
+                Suspend
+              </button>
+            </>
+          )}
+
           {resourceType === 'property' && (
             <>
               <button

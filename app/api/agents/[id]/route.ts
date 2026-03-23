@@ -31,7 +31,7 @@ export async function PATCH(
     }
 
     const { data, error } = await supabase
-      .from('agent_profiles')
+      .from('agents')
       .update({ ...allowed, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select('id, status, verified, featured')
@@ -56,7 +56,7 @@ export async function DELETE(
     const supabase = createAdminClient()
 
     const { error } = await supabase
-      .from('agent_profiles')
+      .from('agents')
       .delete()
       .eq('id', id)
 

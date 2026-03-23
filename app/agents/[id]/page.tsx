@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params
   const admin = createAdminClient()
   const { data } = await admin
-    .from('agent_profiles')
+    .from('agents')
     .select('business_name')
     .eq('id', id)
     .single()
@@ -36,7 +36,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
   const admin = createAdminClient()
 
   const { data: agent, error } = await admin
-    .from('agent_profiles')
+    .from('agents')
     .select('*, agent_service_areas (city, is_primary), agent_reviews (id, rating, status)')
     .eq('id', id)
     .single()

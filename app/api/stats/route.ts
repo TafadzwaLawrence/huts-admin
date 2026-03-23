@@ -20,6 +20,7 @@ export async function GET() {
       { count: renterCount },
       { count: totalConversations },
       { count: totalReviews },
+      { count: pendingAgents },
     ] = await Promise.all([
       admin.from('properties').select('*', { count: 'exact', head: true }),
       admin.from('properties').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
@@ -30,6 +31,7 @@ export async function GET() {
       admin.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'renter'),
       admin.from('conversations').select('*', { count: 'exact', head: true }),
       admin.from('reviews').select('*', { count: 'exact', head: true }),
+      admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ])
 
     return NextResponse.json({
@@ -46,6 +48,9 @@ export async function GET() {
       },
       conversations: totalConversations || 0,
       reviews: totalReviews || 0,
+      agents: {
+        pending: pendingAgents || 0,
+      },
     })
   } catch (error) {
     console.error('[Admin Stats] Error:', error)

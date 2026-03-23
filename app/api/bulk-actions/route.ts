@@ -153,8 +153,6 @@ export async function POST(request: NextRequest) {
           },
         })
       }
-    }
-
     } else if (resourceType === 'agent') {
       for (const agentId of resourceIds) {
         try {

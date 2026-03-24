@@ -46,7 +46,7 @@ export default function AdminPropertiesPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [error, setError] = useState<string | null>(null)
 
-  const fetchProperties = async () {
+  const fetchProperties = async () => {
     setLoading(true)
     setError(null)
     try {

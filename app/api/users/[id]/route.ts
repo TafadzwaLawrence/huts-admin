@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin, logAdminActivity } from '@/lib/admin'
+import { requireAdmin, logAdminActivity, UnauthorizedError } from '@/lib/admin'
 
 // PATCH /api/users/[id] - Update user details
 export async function PATCH(
@@ -53,11 +53,9 @@ export async function PATCH(
     return NextResponse.json({ user: updatedUser })
   } catch (error: any) {
     console.error('User update error:', error)
-    
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -102,11 +100,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('User deletion error:', error)
-    
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -156,11 +152,9 @@ export async function GET(
     })
   } catch (error: any) {
     console.error('User fetch error:', error)
-    
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

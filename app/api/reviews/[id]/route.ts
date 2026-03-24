@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin, logAdminActivity } from '@/lib/admin'
+import { requireAdmin, logAdminActivity, UnauthorizedError } from '@/lib/admin'
 
 // DELETE /api/reviews/[id] - Hard delete a review
 export async function DELETE(
@@ -41,8 +41,8 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('[Admin Reviews] DELETE error:', error)
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

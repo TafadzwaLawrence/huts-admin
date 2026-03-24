@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin, logAdminActivity } from '@/lib/admin'
+import { requireAdmin, logAdminActivity, UnauthorizedError } from '@/lib/admin'
 
 // PATCH /api/properties/[id] - Update property fields or toggle status
 export async function PATCH(
@@ -74,8 +74,8 @@ export async function PATCH(
     return NextResponse.json({ property: data })
   } catch (error: any) {
     console.error('[Admin] property PATCH error:', error)
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -121,8 +121,8 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('[Admin] property DELETE error:', error)
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

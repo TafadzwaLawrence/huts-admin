@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/admin'
+import { requireAdmin, UnauthorizedError } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,6 +54,9 @@ export async function GET() {
     })
   } catch (error) {
     console.error('[Admin Stats] Error:', error)
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

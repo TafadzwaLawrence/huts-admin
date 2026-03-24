@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/admin'
-import { logAdminActivity } from '@/lib/admin'
+import { requireAdmin, logAdminActivity, UnauthorizedError } from '@/lib/admin'
 import { createAdminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -195,8 +194,8 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('[Bulk Actions] Error:', error)
 
-    if (error.message === 'Unauthorized: Admin access required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

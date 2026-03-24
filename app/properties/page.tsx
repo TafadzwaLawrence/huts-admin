@@ -8,6 +8,7 @@ import {
   MapPin, 
   Home,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react'
 import { formatPrice, formatSalePrice } from '@/lib/utils'
 import { AdminPageHeader, AdminEmptyState, AdminPagination, AdminExportButton } from '@/components/admin'
@@ -43,18 +44,21 @@ export default function AdminPropertiesPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [error, setError] = useState<string | null>(null)
 
-  const fetchProperties = async () => {
+  const fetchProperties = async () {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/properties?status=${statusFilter}&page=${page}&limit=20`)
-      if (!res.ok) throw new Error('Failed to fetch')
+      if (!res.ok) throw new Error(`Server error (${res.status})`)
       const data = await res.json()
       setProperties(data.properties)
       setTotalPages(data.totalPages)
       setTotal(data.total)
-    } catch (error) {
-      console.error('Error fetching properties:', error)
+    } catch (err) {
+      console.error('Error fetching properties:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load properties')
     } finally {
       setLoading(false)
     }
@@ -107,6 +111,17 @@ export default function AdminPropertiesPage() {
             </div>
           ))}
         </div>
+      ) : error ? (
+        <AdminEmptyState
+          icon={AlertCircle}
+          title="Failed to load properties"
+          description={error}
+          action={
+            <button onClick={fetchProperties} className="text-sm px-4 py-2 bg-adm-accent text-white rounded-lg hover:bg-adm-accent/90 transition-colors">
+              Try again
+            </button>
+          }
+        />
       ) : properties.length === 0 ? (
         <AdminEmptyState
           icon={Building2}

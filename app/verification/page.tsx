@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice, formatSalePrice } from '@/lib/utils'
@@ -56,6 +57,7 @@ export default function AdminVerificationPage() {
   const [total, setTotal] = useState(0)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   // Bulk selection state
   const {
@@ -71,16 +73,18 @@ export default function AdminVerificationPage() {
 
   const fetchProperties = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/properties?status=pending&page=${page}&limit=10`)
-      if (!res.ok) throw new Error('Failed to fetch')
+      if (!res.ok) throw new Error(`Server error (${res.status})`)
       const data = await res.json()
       setProperties(data.properties)
       setTotalPages(data.totalPages)
       setTotal(data.total)
       clearSelection()
-    } catch (error) {
-      console.error('Error fetching properties:', error)
+    } catch (err) {
+      console.error('Error fetching properties:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load properties')
     } finally {
       setLoading(false)
     }
@@ -144,6 +148,17 @@ export default function AdminVerificationPage() {
             </div>
           ))}
         </div>
+      ) : error ? (
+        <AdminEmptyState
+          icon={AlertCircle}
+          title="Failed to load verification queue"
+          description={error}
+          action={
+            <button onClick={fetchProperties} className="text-sm px-4 py-2 bg-adm-accent text-white rounded-lg hover:bg-adm-accent/90 transition-colors">
+              Try again
+            </button>
+          }
+        />
       ) : properties.length === 0 ? (
         <AdminEmptyState
           icon={ShieldCheck}

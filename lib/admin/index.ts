@@ -1,7 +1,7 @@
 // Admin utilities index
 // Centralized exports for all admin helper functions
 
-export { checkIsAdmin, requireAdmin } from './check-admin'
+export { checkIsAdmin, requireAdmin, UnauthorizedError } from './check-admin'
 export { 
   logAdminActivity, 
   getRecentActivity, 

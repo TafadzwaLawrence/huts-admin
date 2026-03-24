@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/admin'
+import { requireAdmin, UnauthorizedError } from '@/lib/admin'
 
 export async function PATCH(
   req: Request,
@@ -42,6 +42,9 @@ export async function PATCH(
     return NextResponse.json({ data })
   } catch (error) {
     console.error('[Admin] agents PATCH error:', error)
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -65,6 +68,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[Admin] agents DELETE error:', error)
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

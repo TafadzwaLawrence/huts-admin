@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin, logAdminActivity } from '@/lib/admin'
+import { requireAdmin, logAdminActivity, UnauthorizedError } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('[Admin Properties] Error:', error)
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -97,6 +100,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[Admin Properties PATCH] Error:', error)
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

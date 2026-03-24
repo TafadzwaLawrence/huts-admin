@@ -1,5 +1,12 @@
 import { currentUser } from '@clerk/nextjs/server'
 
+export class UnauthorizedError extends Error {
+  constructor(message = 'Unauthorized: Admin access required') {
+    super(message)
+    this.name = 'UnauthorizedError'
+  }
+}
+
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map(e => e.trim())
@@ -25,7 +32,7 @@ export async function requireAdmin() {
   const { isAdmin, user } = await checkIsAdmin()
 
   if (!isAdmin || !user) {
-    throw new Error('Unauthorized: Admin access required')
+    throw new UnauthorizedError()
   }
 
   return { user }

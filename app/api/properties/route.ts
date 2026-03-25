@@ -35,7 +35,10 @@ export async function GET(request: NextRequest) {
 
     const { data, count, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error('[Admin Properties] Supabase error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json({
       properties: data || [],

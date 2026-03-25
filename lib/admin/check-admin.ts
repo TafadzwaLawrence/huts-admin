@@ -13,7 +13,13 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .filter(Boolean)
 
 export async function checkIsAdmin() {
-  const clerkUser = await currentUser()
+  let clerkUser
+  try {
+    clerkUser = await currentUser()
+  } catch (err) {
+    console.error('[checkIsAdmin] currentUser() threw:', err)
+    return { isAdmin: false, user: null }
+  }
 
   if (!clerkUser) {
     return { isAdmin: false, user: null }

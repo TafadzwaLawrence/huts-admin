@@ -45,7 +45,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`group flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all ${
                 active
                   ? 'bg-adm-accent/15 text-adm-accent'
                   : 'text-adm-muted hover:text-adm-text hover:bg-adm-surface-2'
@@ -57,7 +57,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
               />
               <span className="flex-1">{label}</span>
               {hasBadge && (
-                <span className="px-1.5 py-0.5 bg-adm-amber/20 text-adm-amber rounded text-[10px] font-bold">
+                <span className="px-1.5 py-0.5 bg-adm-amber/20 text-adm-amber text-[10px] font-bold">
                   {pendingCount}
                 </span>
               )}
@@ -70,7 +70,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
       <div className="px-2.5 py-4 border-t border-adm-border space-y-0.5 flex-shrink-0">
         {user && (
           <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
-            <div className="w-7 h-7 rounded-full bg-adm-accent/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 bg-adm-accent/20 flex items-center justify-center flex-shrink-0">
               <span className="text-xs font-bold text-adm-accent">
                 {(user.email ?? '?')[0].toUpperCase()}
               </span>
@@ -81,7 +81,7 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
         <button
             type="button"
             onClick={() => signOut({ redirectUrl: '/' })}
-            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-adm-muted hover:text-adm-red hover:bg-adm-red/5 transition-all"
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-adm-muted hover:text-adm-red hover:bg-adm-red/5 transition-all"
           >
             <LogOut size={15} />
             Sign out
@@ -102,14 +102,14 @@ export function Sidebar({ user, pendingCount }: SidebarProps) {
         <div className="flex items-center gap-2.5">
           <HutsLogo size={28} />
           {pendingCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 bg-adm-amber/20 text-adm-amber rounded text-[10px] font-bold">
+            <span className="ml-1 px-1.5 py-0.5 bg-adm-amber/20 text-adm-amber text-[10px] font-bold">
               {pendingCount}
             </span>
           )}
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="p-1.5 text-adm-muted hover:text-adm-text transition-colors rounded-lg hover:bg-adm-surface-2"
+          className="p-1.5 text-adm-muted hover:text-adm-text transition-colors hover:bg-adm-surface-2"
           aria-label="Toggle menu"
         >
           {open ? <X size={20} /> : <Menu size={20} />}

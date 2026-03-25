@@ -29,7 +29,7 @@ export function AdminActionButton({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg disabled:opacity-50 transition-colors ${variants[variant]} ${className}`}
+      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold disabled:opacity-50 transition-colors ${variants[variant]} ${className}`}
     >
       {loading ? (
         <Loader2 size={14} className="animate-spin" />

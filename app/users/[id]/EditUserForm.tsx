@@ -64,16 +64,16 @@ export default function EditUserForm({ user }: EditUserFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* User Metadata */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-off-white rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-adm-surface-2">
         <div className="flex items-center gap-2 text-sm">
-          <Mail size={16} className="text-dark-gray" />
-          <span className="text-dark-gray">Email:</span>
-          <span className="font-medium text-charcoal">{user.email}</span>
+          <Mail size={16} className="text-adm-muted" />
+          <span className="text-adm-muted">Email:</span>
+          <span className="font-medium text-adm-text">{user.email}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <Calendar size={16} className="text-dark-gray" />
-          <span className="text-dark-gray">Joined:</span>
-          <span className="font-medium text-charcoal">
+          <Calendar size={16} className="text-adm-muted" />
+          <span className="text-adm-muted">Joined:</span>
+          <span className="font-medium text-adm-text">
             {new Date(user.created_at).toLocaleDateString()}
           </span>
         </div>
@@ -81,7 +81,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
 
       {/* Name Field */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-charcoal mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-adm-text mb-2">
           <div className="flex items-center gap-2">
             <User size={16} />
             Name
@@ -92,26 +92,25 @@ export default function EditUserForm({ user }: EditUserFormProps) {
           id="name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-2 border border-light-gray rounded-lg focus:outline-none focus:border-charcoal"
-          placeholder="User's full name"
+          className="w-full px-4 py-2 border border-adm-border bg-adm-surface-2 text-adm-text focus:outline-none focus:border-adm-accent"
         />
       </div>
 
       {/* Role Field */}
       <div>
-        <label htmlFor="role" className="block text-sm font-medium text-charcoal mb-2">
+        <label htmlFor="role" className="block text-sm font-medium text-adm-text mb-2">
           User Role
         </label>
         <select
           id="role"
           value={formData.role}
           onChange={(e) => setFormData({ ...formData, role: e.target.value as 'landlord' | 'renter' })}
-          className="w-full px-4 py-2 border border-light-gray rounded-lg focus:outline-none focus:border-charcoal"
+          className="w-full px-4 py-2 border border-adm-border bg-adm-surface-2 text-adm-text focus:outline-none focus:border-adm-accent"
         >
           <option value="landlord">Landlord</option>
           <option value="renter">Renter</option>
         </select>
-        <p className="text-xs text-dark-gray mt-2">
+        <p className="text-xs text-adm-muted mt-2">
           Landlords can list properties, renters can search and inquire
         </p>
       </div>
@@ -123,44 +122,44 @@ export default function EditUserForm({ user }: EditUserFormProps) {
           id="verified"
           checked={formData.verified}
           onChange={(e) => setFormData({ ...formData, verified: e.target.checked })}
-          className="mt-1 h-4 w-4 border-light-gray rounded focus:ring-charcoal"
+          className="mt-1 h-4 w-4 border-adm-border focus:ring-adm-accent"
         />
         <div>
-          <label htmlFor="verified" className="text-sm font-medium text-charcoal cursor-pointer">
+          <label htmlFor="verified" className="text-sm font-medium text-adm-text cursor-pointer">
             Verified User
           </label>
-          <p className="text-xs text-dark-gray mt-1">
+          <p className="text-xs text-adm-muted mt-1">
             Verified users have confirmed their email address
           </p>
         </div>
       </div>
 
       {/* Admin Checkbox */}
-      <div className="flex items-start gap-3 p-4 bg-[#F8F9FA] border border-[#E9ECEF] rounded-lg">
+      <div className="flex items-start gap-3 p-4 bg-adm-surface-2 border border-adm-border">
         <input
           type="checkbox"
           id="is_admin"
           checked={formData.is_admin}
           onChange={(e) => setFormData({ ...formData, is_admin: e.target.checked })}
-          className="mt-1 h-4 w-4 border-amber-300 rounded focus:ring-amber-500"
+          className="mt-1 h-4 w-4 border-adm-border focus:ring-adm-accent"
         />
         <div className="flex-1">
-          <label htmlFor="is_admin" className="text-sm font-medium text-[#495057] cursor-pointer flex items-center gap-2">
+          <label htmlFor="is_admin" className="text-sm font-medium text-adm-text cursor-pointer flex items-center gap-2">
             <Shield size={16} />
             Admin Access
           </label>
-          <p className="text-xs text-[#495057] mt-1">
+          <p className="text-xs text-adm-muted mt-1">
             Admin users have full access to the admin panel and can manage all users and properties
           </p>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3 pt-4 border-t border-light-gray">
+      <div className="flex items-center gap-3 pt-4 border-t border-adm-border">
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#212529] text-white hover:bg-black disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-adm-accent text-white hover:bg-adm-accent/80 disabled:opacity-50 transition-colors"
         >
           {loading && <span className="animate-spin">⏳</span>}
           Save Changes

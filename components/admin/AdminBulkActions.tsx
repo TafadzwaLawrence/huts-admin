@@ -69,9 +69,9 @@ export function BulkActionToolbar({
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-adm-surface-2 text-adm-text rounded-xl shadow-2xl px-6 py-4 flex items-center gap-6 border border-adm-border">
+      <div className="bg-adm-surface-2 text-adm-text shadow-2xl px-6 py-4 flex items-center gap-6 border border-adm-border">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-adm-accent/20 flex items-center justify-center text-xs font-bold text-adm-accent">
+          <div className="w-6 h-6 bg-adm-accent/20 flex items-center justify-center text-xs font-bold text-adm-accent">
             {selectedCount}
           </div>
           <span className="font-medium">

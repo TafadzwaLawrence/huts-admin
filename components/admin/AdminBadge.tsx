@@ -74,7 +74,7 @@ export function AdminBadge({
 
   return (
     <span 
-      className={`inline-flex items-center ${sizeClasses} rounded-full font-semibold ${config.bg} ${config.text}`}
+      className={`inline-flex items-center ${sizeClasses} font-semibold ${config.bg} ${config.text}`}
     >
       {showIcon && <Icon size={iconSize} />}
       {displayLabel}

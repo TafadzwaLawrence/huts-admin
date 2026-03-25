@@ -39,13 +39,13 @@ async function UserDetails({ userId }: { userId: string }) {
       <div className="flex items-center gap-4">
         <Link
           href="/users"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-adm-surface-2 transition-colors"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="text-adm-muted" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-charcoal">Edit User</h1>
-          <p className="text-sm text-dark-gray mt-1">
+          <h1 className="text-2xl font-bold text-adm-text">Edit User</h1>
+          <p className="text-sm text-adm-muted mt-1">
             User ID: {userId}
           </p>
         </div>
@@ -71,10 +71,10 @@ async function UserDetails({ userId }: { userId: string }) {
       </div>
 
       {/* Edit Form */}
-      <div className="bg-white rounded-lg border border-light-gray p-6">
+      <div className="bg-adm-surface border border-adm-border p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-charcoal">User Information</h2>
-          <p className="text-sm text-dark-gray mt-1">
+          <h2 className="text-lg font-semibold text-adm-text">User Information</h2>
+          <p className="text-sm text-adm-muted mt-1">
             Update user details and permissions
           </p>
         </div>
@@ -83,25 +83,25 @@ async function UserDetails({ userId }: { userId: string }) {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-lg border border-red-200 p-6">
+      <div className="bg-adm-surface border border-adm-red/20 p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-red-600">Danger Zone</h2>
-          <p className="text-sm text-dark-gray mt-1">
+          <h2 className="text-lg font-semibold text-adm-red">Danger Zone</h2>
+          <p className="text-sm text-adm-muted mt-1">
             Irreversible and destructive actions
           </p>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-charcoal">Delete User</h3>
-            <p className="text-sm text-dark-gray mt-1">
+            <h3 className="font-medium text-adm-text">Delete User</h3>
+            <p className="text-sm text-adm-muted mt-1">
               Permanently delete this user and all their data
             </p>
           </div>
           <form action={`/api/users/${userId}`} method="DELETE">
             <button
               type="submit"
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-4 py-2 bg-adm-red text-white hover:bg-adm-red/80 transition-colors"
               onClick={(e) => {
                 if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
                   e.preventDefault()

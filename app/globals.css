@@ -3,18 +3,22 @@
 @tailwind utilities;
 
 /* =============================================
-   HUTS ADMIN — DARK THEME
-   Palette: GitHub-dark inspired
+   HUTS ADMIN — DARK THEME  ·  SHARP EDGES
    ============================================= */
 
 @layer base {
+  /* ── Sharp corners globally ── */
+  *, *::before, *::after {
+    border-radius: 0 !important;
+  }
+
   * {
     scrollbar-color: #30363D #161B22;
     scrollbar-width: thin;
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #161B22; }
-  ::-webkit-scrollbar-thumb { background: #30363D; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #30363D; }
   ::-webkit-scrollbar-thumb:hover { background: #484F58; }
 
   body {
@@ -28,14 +32,47 @@
     outline: 2px solid #8957E5;
     outline-offset: 2px;
   }
+
+  input, textarea, select {
+    background-color: #161B22;
+    color: #E6EDF3;
+    border-color: #30363D;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #484F58;
+  }
+}
+
+@layer components {
+  /* ── Base button ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition-colors disabled:opacity-50;
+    border-radius: 0 !important;
+  }
+  .btn-primary {
+    @apply bg-adm-accent text-white hover:bg-adm-accent/80;
+  }
+  .btn-secondary {
+    @apply border border-adm-border text-adm-muted hover:border-adm-faint hover:text-adm-text;
+  }
+  .btn-ghost {
+    @apply text-adm-muted hover:text-adm-text hover:bg-adm-surface-2;
+  }
+  .btn-icon {
+    @apply p-2 text-adm-muted hover:text-adm-text hover:bg-adm-surface-2;
+  }
+  .btn-danger {
+    @apply border border-adm-red/40 text-adm-red hover:bg-adm-red/10;
+  }
 }
 
 /* Fade-in animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+.animate-fadeIn { animation: fadeIn 0.2s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

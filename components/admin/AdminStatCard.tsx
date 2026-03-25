@@ -19,13 +19,13 @@ export function AdminStatCard({
   description 
 }: AdminStatCardProps) {
   const content = (
-    <div className={`group bg-adm-surface rounded-xl border p-5 transition-all ${
+    <div className={`group bg-adm-surface border p-5 transition-all ${
       highlight 
         ? 'border-adm-amber/30 hover:border-adm-amber/60' 
         : 'border-adm-border hover:border-adm-faint'
     } ${href ? 'cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-3">
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+        <div className={`w-9 h-9 flex items-center justify-center transition-colors ${
           highlight
             ? 'bg-adm-amber/10'
             : 'bg-adm-surface-2 group-hover:bg-adm-accent/15'

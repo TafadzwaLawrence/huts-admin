@@ -1,10 +1,11 @@
 import { Suspense } from 'react'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/admin'
+import { createAdminClient } from '@/lib/supabase/server'
 import EditUserForm from '@/app/users/[id]/EditUserForm'
 import { Building2, FileText, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { AdminStatCard, AdminBadge } from '@/components/admin'
+import { AdminStatCard } from '@/components/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,25 +14,26 @@ interface PageProps {
 }
 
 async function UserDetails({ userId }: { userId: string }) {
-  // Fetch user details with stats
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/users/${userId}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
-    }
-  )
+  const admin = createAdminClient()
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      notFound()
-    }
-    throw new Error('Failed to fetch user')
+  const { data: userData, error } = await admin
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (error || !userData) notFound()
+
+  const [{ count: propertiesCount }, { count: reviewsCount }] = await Promise.all([
+    admin.from('properties').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+    admin.from('reviews').select('*', { count: 'exact', head: true }).eq('author_id', userId),
+  ])
+
+  const stats = {
+    propertiesCount: propertiesCount ?? 0,
+    reviewsWritten: reviewsCount ?? 0,
+    reviewsReceived: 0,
   }
-
-  const { user: userData, stats } = await response.json()
 
   return (
     <div className="space-y-6">

@@ -298,13 +298,6 @@ export default function AdminPropertiesPage() {
     </div>
   )
 }
-
-interface Property {
-  id: string
-  title: string
-  slug: string
-  status: string
-  verification_status: string
   listing_type: string | null
   price: number | null
   sale_price: number | null

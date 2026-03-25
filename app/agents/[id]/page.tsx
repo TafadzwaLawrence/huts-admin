@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/admin'
-import { notFound } from 'next/navigation'
+import { checkIsAdmin } from '@/lib/admin'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   Building2, Home, Briefcase, Camera, Award,
@@ -33,7 +33,8 @@ const agentTypeIcons: Record<string, any> = {
 
 export default async function AdminAgentDetailPage({ params }: Props) {
   const { id } = await params
-  await requireAdmin()
+  const { isAdmin } = await checkIsAdmin()
+  if (!isAdmin) redirect('/unauthorized')
   const admin = createAdminClient()
 
   const { data: agent, error } = await admin

@@ -1,7 +1,8 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { requireAdmin } from '@/lib/admin'
+import { checkIsAdmin } from '@/lib/admin'
 import { createAdminClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import EditUserForm from '@/app/users/[id]/EditUserForm'
 import { Building2, FileText, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -120,7 +121,8 @@ async function UserDetails({ userId }: { userId: string }) {
 }
 
 export default async function Page({ params }: PageProps) {
-  await requireAdmin()
+  const { isAdmin } = await checkIsAdmin()
+  if (!isAdmin) redirect('/unauthorized')
   const { id } = await params
 
   return (

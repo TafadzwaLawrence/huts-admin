@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/admin'
+import { checkIsAdmin } from '@/lib/admin'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'  
 import { Users } from 'lucide-react'
 import AgentsTableClient from './AgentsTableClient'
@@ -19,7 +20,8 @@ export default async function AdminAgentsPage({
   searchParams: Promise<{ status?: string }>
 }) {
   const { status } = await searchParams
-  await requireAdmin()
+  const { isAdmin } = await checkIsAdmin()
+  if (!isAdmin) redirect('/unauthorized')
   const admin = createAdminClient()
 
   // Default to 'pending' if no valid status is provided

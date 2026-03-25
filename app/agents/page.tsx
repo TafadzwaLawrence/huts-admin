@@ -1,9 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { checkIsAdmin } from '@/lib/admin'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'  
-import { Users } from 'lucide-react'
+import Link from 'next/link'
+import { Users, Briefcase, ShieldAlert, ShieldOff } from 'lucide-react'
 import AgentsTableClient from './AgentsTableClient'
+import { AdminStatCard } from '@/components/admin'
 
 export const metadata = { title: 'Agent Management | Admin' }
 
@@ -36,12 +37,14 @@ export default async function AdminAgentsPage({
 
   const [
     { data: agentRows, error },
+    { count: totalCount },
     { count: pendingCount },
     { count: activeCount },
     { count: suspendedCount },
     { count: inactiveCount },
   ] = await Promise.all([
     agentsQueryBuilder,
+    admin.from('agents').select('*', { count: 'exact', head: true }),
     admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'suspended'),
@@ -70,6 +73,14 @@ export default async function AdminAgentsPage({
         <p className="text-sm text-adm-muted mt-1">
           Review, approve, and manage real estate professionals on Huts.
         </p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <AdminStatCard label="Total Agents"      value={totalCount     || 0} icon={Briefcase}  href="/agents" />
+        <AdminStatCard label="Pending Approval"  value={pendingCount   || 0} icon={ShieldAlert} href="/agents?status=pending"  highlight={(pendingCount || 0) > 0} />
+        <AdminStatCard label="Active Agents"     value={activeCount    || 0} icon={Users}       href="/agents?status=active" />
+        <AdminStatCard label="Suspended"         value={suspendedCount || 0} icon={ShieldOff}   href="/agents?status=suspended" highlight={(suspendedCount || 0) > 0} />
       </div>
 
       {/* Status Tabs */}
@@ -112,7 +123,7 @@ export default async function AdminAgentsPage({
           </p>
         </div>
       ) : (
-        <AgentsTableClient agents={agents} />
+        <AgentsTableClient agents={agents} statusFilter={statusFilter} />
       )}
     </div>
   )

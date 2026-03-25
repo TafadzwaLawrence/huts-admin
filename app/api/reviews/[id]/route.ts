@@ -33,7 +33,7 @@ export async function PATCH(
 
     await logAdminActivity({
       adminId: adminUser!.id,
-      action: 'review_status_changed',
+      action: 'other',
       resourceType: 'review',
       resourceId: reviewId,
       metadata: { newStatus: status },

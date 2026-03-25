@@ -10,19 +10,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Admin dark theme tokens
-        'adm-bg':        '#0D1117',
-        'adm-surface':   '#161B22',
-        'adm-surface-2': '#21262D',
-        'adm-border':    '#30363D',
-        'adm-text':      '#E6EDF3',
-        'adm-muted':     '#7D8590',
-        'adm-faint':     '#484F58',
-        'adm-accent':    '#8957E5',
-        'adm-green':     '#3FB950',
-        'adm-amber':     '#D29922',
-        'adm-red':       '#F85149',
-        'adm-blue':      '#58A6FF',
+        // Admin dark theme tokens — pure black
+        'adm-bg':        '#000000',
+        'adm-surface':   '#0A0A0A',
+        'adm-surface-2': '#141414',
+        'adm-border':    '#222222',
+        'adm-text':      '#FFFFFF',
+        'adm-muted':     '#888888',
+        'adm-faint':     '#444444',
+        'adm-accent':    '#A855F7',
+        'adm-green':     '#22C55E',
+        'adm-amber':     '#F59E0B',
+        'adm-red':       '#EF4444',
+        'adm-blue':      '#3B82F6',
         // Legacy
         'accent-red': '#FF6B6B',
         'accent-green': '#51CF66',

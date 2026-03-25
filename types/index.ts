@@ -46,7 +46,7 @@ export type AgentAdvertisement = any
 
 export type PropertyWithImages = Property & {
   property_images: PropertyImage[]
-  profiles: Pick<Profile, 'name' | 'avatar_url' | 'verified'>
+  profiles: Pick<Profile, 'full_name' | 'avatar_url' | 'verified'>
 }
 
 export type AgentProfileWithDetails = any // AgentProfile & { agent_service_areas: AgentServiceArea[]; agent_achievements: AgentAchievement[]; agent_reviews: AgentReview[] }

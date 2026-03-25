@@ -16,7 +16,7 @@ import { ICON_SIZES } from '@/lib/constants'
 
 interface User {
   id: string
-  name: string | null
+  full_name: string | null
   email: string
   phone: string | null
   role: string
@@ -153,10 +153,10 @@ export default function AdminUsersPage() {
                   {/* User */}
                   <div className="md:col-span-2 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-adm-surface-2 flex items-center justify-center text-sm font-bold text-adm-muted flex-shrink-0 border border-adm-border">
-                      {(u.name || u.email || '?')[0].toUpperCase()}
+                      {(u.full_name || u.email || '?')[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-adm-text truncate">{u.name || 'No name'}</p>
+                      <p className="text-sm font-medium text-adm-text truncate">{u.full_name || 'No name'}</p>
                       <p className="text-xs text-adm-faint truncate md:hidden">{u.email}</p>
                     </div>
                   </div>

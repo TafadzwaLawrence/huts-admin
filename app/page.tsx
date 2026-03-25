@@ -51,9 +51,9 @@ export default async function AdminOverviewPage() {
     admin.from('reviews').select('*', { count: 'exact', head: true }),
     admin.from('properties').select(`
       id, title, city, listing_type, created_at,
-      profiles!properties_user_id_fkey(name, email)
+      profiles!properties_user_id_fkey(full_name, email)
     `).eq('verification_status', 'pending').order('created_at', { ascending: false }).limit(5),
-    admin.from('profiles').select('id, name, email, role, created_at').order('created_at', { ascending: false }).limit(5),
+    admin.from('profiles').select('id, full_name, email, role, created_at').order('created_at', { ascending: false }).limit(5),
     admin.from('agents').select('*', { count: 'exact', head: true }),
     admin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
   ])
@@ -151,7 +151,7 @@ export default async function AdminOverviewPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-adm-text truncate">{p.title}</p>
                     <p className="text-xs text-adm-muted mt-0.5">
-                      {(p.profiles as any)?.name || 'Unknown'} · {p.city}
+                      {(p.profiles as any)?.full_name || 'Unknown'} · {p.city}
                     </p>
                   </div>
                   <AdminBadge
@@ -192,11 +192,11 @@ export default async function AdminOverviewPage() {
                 >
                   <div className="w-8 h-8 rounded-full bg-adm-accent/15 flex items-center justify-center flex-shrink-0">
                     <span className="text-xs font-bold text-adm-accent">
-                      {(u.name || u.email)?.[0]?.toUpperCase()}
+                      {(u.full_name || u.email)?.[0]?.toUpperCase()}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-adm-text truncate">{u.name || 'No name'}</p>
+                    <p className="text-sm font-medium text-adm-text truncate">{u.full_name || 'No name'}</p>
                     <p className="text-xs text-adm-muted truncate">{u.email}</p>
                   </div>
                   <AdminBadge variant={u.role === 'landlord' ? 'active' : 'inactive'} label={u.role} showIcon={false} size="sm" />

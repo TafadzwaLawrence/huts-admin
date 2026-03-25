@@ -30,7 +30,7 @@ export interface AgentRow {
   verified: boolean
   status: string
   created_at: string
-  profiles: { name: string | null; email: string } | null
+  profiles: { full_name: string | null; email: string } | null
 }
 
 interface Props {
@@ -101,7 +101,7 @@ export default function AgentsTableClient({ agents }: Props) {
                   </td>
                   <td className="px-5 py-4">
                     <p className="font-semibold text-adm-text">
-                      {agent.business_name || profile?.name || '—'}
+                      {agent.business_name || profile?.full_name || '—'}
                     </p>
                     <p className="text-xs text-adm-faint mt-0.5">{profile?.email}</p>
                   </td>

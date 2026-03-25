@@ -15,7 +15,7 @@ export async function DELETE(
 
     const { data: existing, error: fetchError } = await admin
       .from('reviews')
-      .select('id, comment_text, author_id, property_id')
+      .select('id, comment, author_id, property_id')
       .eq('id', reviewId)
       .single()
 

@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
       .from('reviews')
       .select(
         `
-        id, rating, comment_text, created_at, updated_at,
-        helpful_count, not_helpful_count, is_verified_tenant,
+        id, rating, comment, title, status, flagged_reason, is_verified,
+        created_at, updated_at,
         author_id, property_id,
-        profiles!reviews_author_id_fkey(name, email, avatar_url),
+        profiles!reviews_author_id_fkey(full_name, email, avatar_url),
         properties!reviews_property_id_fkey(title, slug, city)
       `,
         { count: 'exact' }
@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1)
 
     if (status === 'flagged') {
-      query = query.gte('not_helpful_count', 3)
+      query = query.eq('status', 'flagged')
+    } else if (status === 'pending') {
+      query = query.eq('status', 'pending')
     }
 
     const { data, count, error } = await query

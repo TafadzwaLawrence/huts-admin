@@ -41,21 +41,21 @@ export async function GET(request: NextRequest) {
           verification_status,
           price,
           sale_price,
-          beds,
-          baths,
-          sqft,
+          bedrooms,
+          bathrooms,
+          square_feet,
           city,
-          neighborhood,
+          area,
           created_at,
           verified_at,
-          profiles:user_id (name, email, role)
+          profiles!properties_user_id_fkey(full_name, email, role)
         `)
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
       // Generate CSV
-      const csvHeader = 'ID,Title,Slug,Listing Type,Property Type,Status,Verification Status,Price,Sale Price,Beds,Baths,SqFt,City,Neighborhood,Owner Name,Owner Email,Owner Role,Created At,Verified At\n'
+      const csvHeader = 'ID,Title,Slug,Listing Type,Property Type,Status,Verification Status,Price,Sale Price,Beds,Baths,SqFt,City,Area,Owner Name,Owner Email,Owner Role,Created At,Verified At\n'
       
       const csvRows = properties.map((p: any) => {
         const owner = p.profiles || {}
@@ -69,12 +69,12 @@ export async function GET(request: NextRequest) {
           p.verification_status || '',
           p.price || '',
           p.sale_price || '',
-          p.beds || '',
-          p.baths || '',
-          p.sqft || '',
+          p.bedrooms || '',
+          p.bathrooms || '',
+          p.square_feet || '',
           `"${p.city || ''}"`,
-          `"${p.neighborhood || ''}"`,
-          `"${owner.name || ''}"`,
+          `"${p.area || ''}"`,
+          `"${owner.full_name || ''}"`,
           owner.email || '',
           owner.role || '',
           p.created_at || '',
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       // Export all users
       const { data: users, error } = await admin
         .from('profiles')
-        .select('id, name, email, role, phone, verified, is_admin, created_at')
+        .select('id, full_name, email, role, phone, verified, is_admin, created_at')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
       const csvRows = users.map((u: any) => {
         return [
           u.id,
-          `"${u.name || ''}"`,
+          `"${u.full_name || ''}"`,
           u.email || '',
           u.role || '',
           `"${u.phone || ''}"`,

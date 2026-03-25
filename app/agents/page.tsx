@@ -56,7 +56,7 @@ export default async function AdminAgentsPage({
   // Fetch profiles for visible rows only
   const userIds = (agentRows || []).map((a: any) => a.user_id).filter(Boolean)
   const { data: profileRows } = userIds.length
-    ? await admin.from('profiles').select('id, name, email').in('id', userIds)
+    ? await admin.from('profiles').select('id, full_name, email').in('id', userIds)
     : { data: [] }
   const profileMap = Object.fromEntries((profileRows || []).map((p: any) => [p.id, p]))
   const agents = (agentRows || []).map((a: any) => ({ ...a, profiles: profileMap[a.user_id] ?? null }))

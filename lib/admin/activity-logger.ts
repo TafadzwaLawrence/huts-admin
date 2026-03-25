@@ -82,7 +82,7 @@ export async function getRecentActivity(limit = 50, adminId?: string) {
       .from('admin_activity_logs')
       .select(`
         *,
-        profiles!admin_activity_logs_admin_id_fkey(name, email)
+        profiles!admin_activity_logs_admin_id_fkey(full_name, email)
       `)
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -123,7 +123,7 @@ export async function getResourceActivity(
       .from('admin_activity_logs')
       .select(`
         *,
-        profiles!admin_activity_logs_admin_id_fkey(name, email)
+        profiles!admin_activity_logs_admin_id_fkey(full_name, email)
       `)
       .eq('resource_type', resourceType)
       .eq('resource_id', resourceId)

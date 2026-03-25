@@ -47,7 +47,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
   // Fetch profile separately to avoid FK join issues
   const { data: profileData } = await admin
     .from('profiles')
-    .select('name, email, avatar_url, created_at')
+    .select('full_name, email, avatar_url, created_at')
     .eq('id', agent.user_id)
     .single()
   const profile = profileData as any
@@ -79,7 +79,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
             <div className="flex items-start gap-5">
               {/* Avatar */}
               <div className={`w-[72px] h-[72px] rounded-2xl flex items-center justify-center flex-shrink-0 text-3xl font-bold ${avatarClass}`}>
-                {(agent.business_name || profile?.name || 'A')[0].toUpperCase()}
+                {(agent.business_name || profile?.full_name || 'A')[0].toUpperCase()}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -106,7 +106,7 @@ export default async function AdminAgentDetailPage({ params }: Props) {
                 </div>
 
                 <h1 className="text-[22px] font-bold text-[#212529] leading-tight">
-                  {agent.business_name || profile?.name || '—'}
+                  {agent.business_name || profile?.full_name || '—'}
                 </h1>
                 <div className="flex items-center gap-1.5 mt-1 text-sm text-[#495057]">
                   <Icon size={13} className="flex-shrink-0" />

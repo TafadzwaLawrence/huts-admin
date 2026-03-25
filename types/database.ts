@@ -13,36 +13,45 @@ export interface Database {
         Row: {
           id: string
           email: string
-          name: string | null
+          full_name: string | null
           avatar_url: string | null
           phone: string | null
-          role: 'landlord' | 'renter' | 'admin'
+          role: 'landlord' | 'renter' | 'admin' | 'agent'
           bio: string | null
           verified: boolean
+          is_admin: boolean
+          city: string | null
+          area: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id: string
           email: string
-          name?: string | null
+          full_name?: string | null
           avatar_url?: string | null
           phone?: string | null
-          role?: 'landlord' | 'renter' | 'admin'
+          role?: 'landlord' | 'renter' | 'admin' | 'agent'
           bio?: string | null
           verified?: boolean
+          is_admin?: boolean
+          city?: string | null
+          area?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           email?: string
-          name?: string | null
+          full_name?: string | null
           avatar_url?: string | null
           phone?: string | null
-          role?: 'landlord' | 'renter' | 'admin'
+          role?: 'landlord' | 'renter' | 'admin' | 'agent'
           bio?: string | null
           verified?: boolean
+          is_admin?: boolean
+          city?: string | null
+          area?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -64,14 +73,14 @@ export interface Database {
           utilities_included: boolean | null
           nearby_universities: Json | null
           student_lease_terms: string | null
-          beds: number
-          baths: number
-          sqft: number | null
+          bedrooms: number
+          bathrooms: number
+          square_feet: number | null
           address: string
           city: string
           state: string | null
           zip_code: string | null
-          neighborhood: string | null
+          area: string | null
           lat: number | null
           lng: number | null
           amenities: Json
@@ -86,6 +95,9 @@ export interface Database {
           stories: number | null
           slug: string
           meta_description: string | null
+          verification_status: 'pending' | 'approved' | 'rejected'
+          verified_at: string | null
+          rejection_reason: string | null
           created_at: string
           updated_at: string
           published_at: string | null
@@ -101,14 +113,14 @@ export interface Database {
           price?: number | null
           sale_price?: number | null
           deposit?: number | null
-          beds: number
-          baths: number
-          sqft?: number | null
+          bedrooms: number
+          bathrooms: number
+          square_feet?: number | null
           address: string
           city: string
           state?: string | null
           zip_code?: string | null
-          neighborhood?: string | null
+          area?: string | null
           lat?: number | null
           lng?: number | null
           amenities?: Json
@@ -123,6 +135,9 @@ export interface Database {
           stories?: number | null
           slug?: string
           meta_description?: string | null
+          verification_status?: 'pending' | 'approved' | 'rejected'
+          verified_at?: string | null
+          rejection_reason?: string | null
           furnished?: boolean | null
           shared_rooms?: boolean | null
           utilities_included?: boolean | null
@@ -143,14 +158,14 @@ export interface Database {
           price?: number | null
           sale_price?: number | null
           deposit?: number | null
-          beds?: number
-          baths?: number
-          sqft?: number | null
+          bedrooms?: number
+          bathrooms?: number
+          square_feet?: number | null
           address?: string
           city?: string
           state?: string | null
           zip_code?: string | null
-          neighborhood?: string | null
+          area?: string | null
           lat?: number | null
           lng?: number | null
           amenities?: Json
@@ -165,6 +180,9 @@ export interface Database {
           stories?: number | null
           slug?: string
           meta_description?: string | null
+          verification_status?: 'pending' | 'approved' | 'rejected'
+          verified_at?: string | null
+          rejection_reason?: string | null
           furnished?: boolean | null
           shared_rooms?: boolean | null
           utilities_included?: boolean | null
@@ -237,7 +255,7 @@ export interface Database {
           comment: string
           is_verified: boolean
           inquiry_id: string | null
-          status: 'pending' | 'published' | 'flagged' | 'hidden' | 'deleted'
+          status: 'pending' | 'published' | 'flagged' | 'removed'
           flagged_reason: string | null
           flagged_at: string | null
           editable_until: string | null
@@ -254,7 +272,7 @@ export interface Database {
           comment: string
           is_verified?: boolean
           inquiry_id?: string | null
-          status?: 'pending' | 'published' | 'flagged' | 'hidden' | 'deleted'
+          status?: 'pending' | 'published' | 'flagged' | 'removed'
           flagged_reason?: string | null
           flagged_at?: string | null
           editable_until?: string | null
@@ -271,7 +289,7 @@ export interface Database {
           comment?: string
           is_verified?: boolean
           inquiry_id?: string | null
-          status?: 'pending' | 'published' | 'flagged' | 'hidden' | 'deleted'
+          status?: 'pending' | 'published' | 'flagged' | 'removed'
           flagged_reason?: string | null
           flagged_at?: string | null
           editable_until?: string | null

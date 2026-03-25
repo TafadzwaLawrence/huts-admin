@@ -25,15 +25,15 @@ interface Property {
   price: number | null
   sale_price: number | null
   city: string
-  neighborhood: string | null
+  area: string | null
   property_type: string | null
-  beds: number
-  baths: number
-  sqft: number | null
+  bedrooms: number
+  bathrooms: number
+  square_feet: number | null
   created_at: string
   verified_at: string | null
   user_id: string
-  profiles: { name: string | null; email: string; avatar_url: string | null }
+  profiles: { full_name: string | null; email: string; avatar_url: string | null }
   property_images: Array<{ url: string; is_primary: boolean }>
 }
 
@@ -171,14 +171,14 @@ export default function AdminPropertiesPage() {
                         <p className="text-sm font-medium text-adm-text truncate">{property.title}</p>
                         <p className="text-xs text-adm-faint flex items-center gap-1 truncate">
                           <MapPin size={ICON_SIZES.xs} />
-                          {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city}
+                          {property.area ? `${property.area}, ` : ''}{property.city}
                         </p>
                       </div>
                     </div>
 
                     {/* Owner */}
                     <div className="md:col-span-2 min-w-0 hidden md:block">
-                      <p className="text-xs text-adm-muted truncate">{owner?.name || 'Unknown'}</p>
+                      <p className="text-xs text-adm-muted truncate">{owner?.full_name || 'Unknown'}</p>
                       <p className="text-[10px] text-adm-faint truncate">{owner?.email}</p>
                     </div>
 

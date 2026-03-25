@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 
 interface User {
   id: string
-  name: string | null
+  full_name: string | null
   email: string
   role: 'landlord' | 'renter'
   verified: boolean
@@ -24,7 +24,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    name: user.name || '',
+    name: user.full_name || '',
     role: user.role,
     verified: user.verified,
     is_admin: user.is_admin,

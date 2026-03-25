@@ -17,7 +17,7 @@ export async function PATCH(
 
     // Build update object with only provided fields
     const updates: any = {}
-    if (name !== undefined) updates.name = name
+    if (name !== undefined) updates.full_name = name
     if (role !== undefined) updates.role = role
     if (verified !== undefined) updates.verified = verified
     if (is_admin !== undefined) updates.is_admin = is_admin
@@ -146,8 +146,9 @@ export async function GET(
     return NextResponse.json({
       user,
       stats: {
-        properties: propertiesCount || 0,
-        reviews: reviewsCount || 0,
+        propertiesCount: propertiesCount || 0,
+        reviewsWritten: reviewsCount || 0,
+        reviewsReceived: 0,
       },
     })
   } catch (error: any) {

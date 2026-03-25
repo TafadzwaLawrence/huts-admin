@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { checkIsAdmin } from '@/lib/admin'
 import { createAdminClient } from '@/lib/supabase/server'
 import EditUserForm from '@/app/users/[id]/EditUserForm'
+import { DeleteUserButton } from '@/app/users/[id]/DeleteUserButton'
 import {
   Building2, FileText, ArrowLeft, Star, MapPin, Home,
   CheckCircle, XCircle, Mail, Phone, Calendar, ShieldCheck,
@@ -205,17 +206,7 @@ async function UserDetails({ userId }: { userId: string }) {
                 <p className="text-sm font-medium text-adm-text">Delete User</p>
                 <p className="text-xs text-adm-muted mt-0.5">Permanently removes this user and all their data</p>
               </div>
-              <form action={`/api/users/${userId}`} method="DELETE">
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm bg-adm-red text-white hover:bg-adm-red/80 transition-colors"
-                  onClick={(e) => {
-                    if (!confirm('Are you absolutely sure? This cannot be undone.')) e.preventDefault()
-                  }}
-                >
-                  Delete User
-                </button>
-              </form>
+              <DeleteUserButton userId={userId} />
             </div>
           </div>
         </div>

@@ -27,7 +27,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const clerkUser = await currentUser()
+  let clerkUser = null
+  try {
+    clerkUser = await currentUser()
+  } catch {
+    // Clerk unavailable or dev-key rate-limited — treat as unauthenticated
+  }
   const email = clerkUser?.emailAddresses[0]?.emailAddress ?? null
 
   const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')

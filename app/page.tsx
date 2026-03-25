@@ -64,6 +64,7 @@ export default async function AdminOverviewPage() {
     )
   }
 
+  try {
   const db = createAdminClient()
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
@@ -609,4 +610,13 @@ export default async function AdminOverviewPage() {
 
     </div>
   )
+  } catch (err: unknown) {
+    console.error('[Dashboard] Server exception:', err)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+        <p className="text-adm-faint text-sm font-medium">Dashboard data could not be loaded.</p>
+        <p className="text-[11px] text-adm-faint/60">A database table may be missing. Check Vercel logs for details.</p>
+      </div>
+    )
+  }
 }
